@@ -1,0 +1,26 @@
+.ds-glass-panel {
+    background: var(--glass-fill);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.ds-glass-panel--padding-none {
+    padding: 0;
+}
+
+.ds-glass-panel--padding-sm {
+    padding: 12px;
+}
+
+.ds-glass-panel--padding-md {
+    padding: 24px;
+}
+
+.ds-glass-panel--padding-lg {
+    padding: 48px;
+}

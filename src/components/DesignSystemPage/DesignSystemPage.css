@@ -1,0 +1,26 @@
+.design-system-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 24px;
+}
+
+.design-system-page section {
+    margin-bottom: 48px;
+}
+
+.design-system-page section>.ds-text--heading {
+    margin-bottom: 24px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.menu-items {
+    max-width: 320px;
+}
