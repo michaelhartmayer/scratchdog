@@ -47,6 +47,10 @@ function displayGeneralHelp() {
       name: 'add <file> <section> <content>',
       desc: 'Appends a new specification item',
     },
+    {
+      name: 'create <folder> <filename> <title>',
+      desc: 'Creates a new specification file',
+    },
     { name: 'help', desc: 'Displays this help message' },
   ];
 
@@ -89,6 +93,15 @@ switch (command) {
   case 'add':
     const { addCommand } = await import('./add.js');
     addCommand(
+      positionalArgs[1],
+      positionalArgs[2],
+      positionalArgs.slice(3).join(' '),
+      options,
+    );
+    break;
+  case 'create':
+    const { createCommand } = await import('./create.js');
+    createCommand(
       positionalArgs[1],
       positionalArgs[2],
       positionalArgs.slice(3).join(' '),
