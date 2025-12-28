@@ -89,6 +89,11 @@ export class DrMarioEngine {
     this._speed = speed;
   }
 
+  // Test Helper: Set status directly
+  public setStatus(status: 'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'VICTORY' | 'CASCADING') {
+    this._status = status;
+  }
+
   public initializeLevel(level: number, speed: 'LOW' | 'MED' | 'HIGH') {
     this._level = level;
     this._speed = speed;

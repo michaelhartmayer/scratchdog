@@ -29,10 +29,8 @@
             2.4.7.2. Has an "Apply" button  
 3. Game Screen  
     3.1. The screen fades in from black  
-    3.2. The HUD is displayed  
-        3.2.1. At the top in white debug text it should say "HUD TBD"  
+    3.2. The HUD is displayed
     3.3. Game play begins  
-        3.3.1. In the center in white text it should say "Game TBD"  
     3.4. Escape key will pause the game  
         3.4.1 A light black scrim quickly fades in  
         3.4.2 The pause menu is displayed  
