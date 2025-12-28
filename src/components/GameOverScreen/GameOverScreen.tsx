@@ -21,7 +21,7 @@ export const GameOverScreen = ({ onMainMenu }: GameOverScreenProps) => {
       onClick={handleClick}
       data-testid="game-over-screen"
     >
-      <div className={`game-over-text phase-${phase}`}>Game Over</div>
+      <div className={`game-over-text phase-${String(phase)}`}>Game Over</div>
     </div>
   );
 };

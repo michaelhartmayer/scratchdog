@@ -26,7 +26,13 @@ test('5.1.2.5 Pill-only matches award 0 points', async ({ page }) => {
     interface TestEngine {
       setGrid(grid: string[][]): void;
       setSpeed(speed: string): void;
-      _activePill: { x: number; y: number; color1: string; color2: string; orientation: string };
+      _activePill: {
+        x: number;
+        y: number;
+        color1: string;
+        color2: string;
+        orientation: string;
+      };
       _dropTimer: number;
     }
     const engine = window.getE2EState('DRMARIO_ENGINE') as TestEngine;
@@ -39,14 +45,23 @@ test('5.1.2.5 Pill-only matches award 0 points', async ({ page }) => {
     engine.setGrid(grid);
     engine.setSpeed('LOW');
 
-    engine._activePill = { x: 3, y: 0, color1: 'Y', color2: 'Y', orientation: 'HORIZONTAL' };
+    engine._activePill = {
+      x: 3,
+      y: 0,
+      color1: 'Y',
+      color2: 'Y',
+      orientation: 'HORIZONTAL',
+    };
     engine._dropTimer = 0;
   });
 
   // Move left 3 times
-  await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(50);
-  await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(50);
-  await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(50);
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForTimeout(50);
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForTimeout(50);
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForTimeout(50);
   // Hard Drop
   await page.keyboard.press('ArrowUp');
   await page.waitForTimeout(1000);

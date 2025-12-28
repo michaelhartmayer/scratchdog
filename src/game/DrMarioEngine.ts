@@ -40,7 +40,12 @@ export class DrMarioEngine {
   private _score = 0;
   private _level = 0;
   private _speed: 'LOW' | 'MED' | 'HIGH' = 'LOW';
-  private _status: 'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'VICTORY' | 'CASCADING' = 'PLAYING';
+  private _status:
+    | 'PLAYING'
+    | 'PAUSED'
+    | 'GAME_OVER'
+    | 'VICTORY'
+    | 'CASCADING' = 'PLAYING';
   private _activePill: ActivePill | null = null;
   private _nextPill: { color1: PillColor; color2: PillColor } | null = null;
   private _virusCount = 0;
@@ -565,7 +570,7 @@ export class DrMarioEngine {
             this._cascadeTimer = 0;
           } else {
             // No movement, no matches, sequence done
-            if (this._status as string !== 'VICTORY') {
+            if ((this._status as string) !== 'VICTORY') {
               this.spawnPill();
               this._status = 'PLAYING';
             }

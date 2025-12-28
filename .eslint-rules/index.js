@@ -8,6 +8,9 @@ import noHtmlHeadings from './no-html-headings/rule.js';
 import noHtmlP from './no-html-p/rule.js';
 import hookNaming from './hook-naming/rule.js';
 import noUseEffectInComponents from './no-use-effect-in-components/rule.js';
+import noDirectE2EState from './no-direct-e2e-state/rule.js';
+import noCommonjsInEslintRules from './no-commonjs-in-eslint-rules/rule.js';
+import mustTestGamestate from './must-test-gamestate/rule.js';
 
 const plugin = {
   rules: {
@@ -21,6 +24,9 @@ const plugin = {
     'no-html-p': noHtmlP,
     'hook-naming': hookNaming,
     'no-use-effect-in-components': noUseEffectInComponents,
+    'no-direct-e2e-state': noDirectE2EState,
+    'no-commonjs-in-eslint-rules': noCommonjsInEslintRules,
+    'must-test-gamestate': mustTestGamestate,
   },
 };
 

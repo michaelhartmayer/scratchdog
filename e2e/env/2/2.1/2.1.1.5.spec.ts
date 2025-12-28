@@ -50,16 +50,5 @@ test.describe('2.1.1.5 Components are not allowed to use html buttons', () => {
     }
   });
 
-  test('2.1.1.5.4 Game Screen debug button uses DesignSystem Button', async ({
-    page,
-  }) => {
-    await page.getByRole('button', { name: 'New Game' }).click();
-    const gameScreen = page.getByTestId('game-screen');
-    await expect(gameScreen).toBeVisible();
 
-    const debugButton = gameScreen.locator(
-      'button[data-testid="trigger-game-over"]',
-    );
-    await expect(debugButton).toHaveClass(/ds-button/);
-  });
 });

@@ -11,7 +11,9 @@ export const useSplashScreen = (
       setFadingOut(true);
     }, 2000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [setFadingOut]);
 
   useEffect(() => {
@@ -19,7 +21,9 @@ export const useSplashScreen = (
       const timer = setTimeout(() => {
         onComplete();
       }, 1000); // 1s fade out
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+      };
     }
   }, [fadingOut, onComplete]);
 
@@ -28,9 +32,13 @@ export const useSplashScreen = (
   }, [onComplete]);
 
   useEffect(() => {
-    const handleKeyDown = () => handleInteraction();
+    const handleKeyDown = () => {
+      handleInteraction();
+    };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [handleInteraction]);
 
   return { handleInteraction };

@@ -23,29 +23,53 @@ function App() {
   return (
     <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
       {screen === 'SPLASH' && (
-        <SplashScreen onComplete={() => setScreen('MENU')} />
+        <SplashScreen
+          onComplete={() => {
+            setScreen('MENU');
+          }}
+        />
       )}
 
       {screen === 'MENU' && (
         <MainMenu
-          onNewGame={() => setScreen('GAME')}
-          onContinue={() => setScreen('GAME')}
-          onOptions={() => setShowOptions(true)}
+          onNewGame={() => {
+            setScreen('GAME');
+          }}
+          onContinue={() => {
+            setScreen('GAME');
+          }}
+          onOptions={() => {
+            setShowOptions(true);
+          }}
         />
       )}
 
       {screen === 'GAME' && (
         <GameScreen
-          onMainMenu={() => setScreen('MENU')}
-          onGameOver={() => setScreen('GAMEOVER')}
+          onMainMenu={() => {
+            setScreen('MENU');
+          }}
+          onGameOver={() => {
+            setScreen('GAMEOVER');
+          }}
         />
       )}
 
       {screen === 'GAMEOVER' && (
-        <GameOverScreen onMainMenu={() => setScreen('MENU')} />
+        <GameOverScreen
+          onMainMenu={() => {
+            setScreen('MENU');
+          }}
+        />
       )}
 
-      {showOptions && <OptionsModal onClose={() => setShowOptions(false)} />}
+      {showOptions && (
+        <OptionsModal
+          onClose={() => {
+            setShowOptions(false);
+          }}
+        />
+      )}
     </div>
   );
 }

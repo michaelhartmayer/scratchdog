@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 export default {
   meta: {
     type: 'problem',
@@ -43,8 +46,6 @@ export default {
 
         // Check 2: There must be an index.ts
         try {
-          const fs = require('fs');
-          const path = require('path');
           const dir = path.dirname(filename);
           const filesInDir = fs.readdirSync(dir);
 
@@ -56,7 +57,7 @@ export default {
               message: `Utility ${utilName} must have an index.ts file in its directory`,
             });
           }
-        } catch (e) {
+        } catch (_e) {
           // Ignore
         }
       },

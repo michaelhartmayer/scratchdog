@@ -58,6 +58,6 @@
     6.3. Level Progression Formula  
         6.3.1. Virus Count = 4 * (Level + 1).  
         6.3.2. Maximum virus count is capped at 84 (Level 20+).  
-7. Technical Details
-    7.1. There should only be one game canvas on screen at a given time.
+7. Technical Details  
+    7.1. There should only be one game canvas on screen at a given time.  
 

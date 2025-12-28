@@ -14,8 +14,8 @@
     "spec": "node scripts/generate-spec.js",
     "specter": "node scripts/cli/index.js",
     "test:unit": "vitest run --coverage",
-    "test:e2e:headless": "playwright test",
-    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:headless": "VITE_E2E_MODE=true playwright test",
+    "test:e2e:headed": "VITE_E2E_MODE=true playwright test --headed",
     "prepare": "husky"
   },
   "dependencies": {

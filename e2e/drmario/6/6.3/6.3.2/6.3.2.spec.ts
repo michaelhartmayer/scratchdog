@@ -1,0 +1,21 @@
+import { test, expect } from '@playwright/test';
+import type { GameState } from '../../../../../src/game/DrMarioEngine';
+
+// 6.3.2 Maximum virus count capped at 84
+/** @mustTestDrMarioGamestate */
+test('6.3.2 Level 0 virus count is within valid range', async ({ page }) => {
+  await page.goto('/');
+  await page.click('body');
+  await page.click('text=New Game');
+  await page.waitForFunction(
+    () =>
+      typeof window.getE2EState === 'function' &&
+      window.getE2EState('DRMARIO_STATE') !== undefined,
+  );
+
+  const state = await page.evaluate(
+    () => window.getE2EState('DRMARIO_STATE') as GameState,
+  );
+  expect(state.virusCount).toBe(4);
+  expect(state.virusCount).toBeLessThanOrEqual(84);
+});

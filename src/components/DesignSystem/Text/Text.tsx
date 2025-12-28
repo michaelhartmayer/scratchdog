@@ -13,10 +13,10 @@ interface TextProps {
   variant?: TextVariant;
   children: React.ReactNode;
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: keyof React.JSX.IntrinsicElements;
 }
 
-const variantTags: Record<TextVariant, keyof JSX.IntrinsicElements> = {
+const variantTags: Record<TextVariant, keyof React.JSX.IntrinsicElements> = {
   hero: 'h1',
   title: 'h2',
   heading: 'h3',
@@ -32,7 +32,7 @@ export const Text = ({
   className = '',
   as,
 }: TextProps) => {
-  const Tag = as || variantTags[variant];
+  const Tag = as ?? variantTags[variant];
   return (
     <Tag
       className={`ds-text ds-text--${variant} ${className}`}

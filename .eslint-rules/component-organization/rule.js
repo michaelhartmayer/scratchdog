@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 export default {
   meta: {
     type: 'problem',
@@ -69,8 +72,6 @@ export default {
           // Standard ESLint rules often avoid fs, but for project-specific repo rules it is acceptable.
 
           try {
-            const fs = require('fs');
-            const path = require('path');
             const dir = path.dirname(filename);
             const filesInDir = fs.readdirSync(dir);
 
@@ -84,7 +85,7 @@ export default {
                 message: `Component ${componentName} must have an index.ts or index.tsx file in its directory`,
               });
             }
-          } catch (e) {
+          } catch (_e) {
             // If we can't access fs (e.g. browser or specific test env), we skip this check
             // or logging it? For now, silent fail or maybe console.warn
           }

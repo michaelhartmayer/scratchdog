@@ -8,6 +8,8 @@ export const useGameScreen = (setPaused: (paused: boolean) => void) => {
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [setPaused]);
 };

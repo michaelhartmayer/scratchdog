@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 export default {
   meta: {
     type: 'problem',
@@ -51,8 +54,6 @@ export default {
 
         // Check 2: There must be an index.ts in the same folder
         try {
-          const fs = require('fs');
-          const path = require('path');
           const dir = path.dirname(filename);
           const filesInDir = fs.readdirSync(dir);
 
@@ -64,7 +65,7 @@ export default {
               message: `Hook ${hookName} must have an index.ts file in its directory`,
             });
           }
-        } catch (e) {
+        } catch (_e) {
           // Ignore fs errors
         }
       },
