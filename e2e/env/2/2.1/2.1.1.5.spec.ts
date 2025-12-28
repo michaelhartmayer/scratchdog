@@ -49,6 +49,4 @@ test.describe('2.1.1.5 Components are not allowed to use html buttons', () => {
       await expect(buttons.nth(i)).toHaveClass(/ds-button/);
     }
   });
-
-
 });

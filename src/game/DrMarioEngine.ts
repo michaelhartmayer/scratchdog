@@ -90,7 +90,9 @@ export class DrMarioEngine {
   }
 
   // Test Helper: Set status directly
-  public setStatus(status: 'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'VICTORY' | 'CASCADING') {
+  public setStatus(
+    status: 'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'VICTORY' | 'CASCADING',
+  ) {
     this._status = status;
   }
 

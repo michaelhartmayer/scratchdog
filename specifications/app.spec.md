@@ -29,7 +29,7 @@
             2.4.7.2. Has an "Apply" button  
 3. Game Screen  
     3.1. The screen fades in from black  
-    3.2. The HUD is displayed
+    3.2. The HUD is displayed  
     3.3. Game play begins  
     3.4. Escape key will pause the game  
         3.4.1 A light black scrim quickly fades in  
