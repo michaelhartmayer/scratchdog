@@ -21,7 +21,9 @@ export async function addCommand(
     console.log(
       'The new item is numbered sequentially after the last existing child of <section>.',
     );
-    console.log("Use '.' (dot) as <section> to explicitly add the item to the root level.");
+    console.log(
+      "Use '.' (dot) as <section> to explicitly add the item to the root level.",
+    );
     console.log('<content> is the text of the new item.');
     console.log('');
     console.log('Options:');

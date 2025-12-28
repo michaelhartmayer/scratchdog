@@ -54,7 +54,7 @@
             1.1.7.4. --help flag displays the help message for the add command.  
             1.1.7.5. Output returns the updated section as if running the toc command on the new item.  
             1.1.7.6. --json flag displays the added item as a JSON object, following the standard format.  
-            1.1.7.7. Use '.' (dot) as <section> to explicitly add the item to the root level.
+            1.1.7.7. Use '.' (dot) as <section> to explicitly add the item to the root level.  
             1.1.7.8. Root level items are numbered sequentially after the last top-level item.  
         1.1.8. create <folder> <filename> <title>  
             1.1.8.1. Creates a new specification file at <folder>/<filename>.  
