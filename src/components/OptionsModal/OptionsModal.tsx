@@ -1,4 +1,5 @@
 import { Button } from '../DesignSystem/Button';
+import { Text } from '../DesignSystem/Text';
 import './OptionsModal.css';
 
 interface OptionsModalProps {
@@ -17,7 +18,7 @@ export const OptionsModal = ({ onClose }: OptionsModalProps) => {
         </div>
         <div className="modal-body">
           <div className="modal-section">
-            <h3>Audio</h3>
+            <Text variant="heading">Audio</Text>
             <label>
               <input type="checkbox" /> Mute
             </label>

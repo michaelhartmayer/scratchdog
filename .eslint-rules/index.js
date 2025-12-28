@@ -4,6 +4,7 @@ import hookOrganization from './hook-organization/rule.js';
 import utilOrganization from './util-organization/rule.js';
 import noEslintDisable from './no-eslint-disable/rule.js';
 import noHtmlButtons from './no-html-buttons/rule.js';
+import noHtmlHeadings from './no-html-headings/rule.js';
 
 const plugin = {
   rules: {
@@ -13,6 +14,7 @@ const plugin = {
     'util-organization': utilOrganization,
     'no-eslint-disable': noEslintDisable,
     'no-html-buttons': noHtmlButtons,
+    'no-html-headings': noHtmlHeadings,
   },
 };
 

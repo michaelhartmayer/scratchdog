@@ -1,4 +1,5 @@
 import { Button } from '../DesignSystem/Button';
+import { Text } from '../DesignSystem/Text';
 import './MainMenu.css';
 
 interface MainMenuProps {
@@ -18,7 +19,7 @@ export const MainMenu = ({
 
   return (
     <div className="main-menu" data-testid="main-menu">
-      <h1 className="menu-title">Main Menu</h1>
+      <Text variant="hero" className="menu-title">Main Menu</Text>
       <div className="menu-items">
         <Button onClick={onNewGame} className="menu-btn">
           New Game
