@@ -157,6 +157,12 @@
         * 1.3.2. General Output    
             * 1.3.2.1. All command outputs should use consistent spacing and indentation.    
             * 1.3.2.2. Error messages must start with "Error: ".    
+        * 1.3.3. JSON Format    
+            * 1.3.3.1. number: The section number without a trailing period.    
+            * 1.3.3.2. name: The name of the section.    
+            * 1.3.3.3. content: The text content of the section, stripped of indentation and numbering.    
+            * 1.3.3.4. Level is not included in the output.    
+            * 1.3.3.5. subsections: An array of nested sections defined recursively.    
 
 
 
@@ -174,6 +180,7 @@
             * 1.1.2.1. Run unit tests    
             * 1.1.2.2. Measure code coverage    
             * 1.1.2.3. Generate test report    
+            * 1.1.2.4. Exclude e2e directory    
         * 1.1.3. npm run test:e2e:headless    
             * 1.1.3.1. Run end-to-end tests headless    
             * 1.1.3.2. Generate test report    

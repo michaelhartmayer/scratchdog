@@ -59,5 +59,11 @@
             1.3.1.3. Arguments must use `<>` for required and `[]` for optional parameters.  
         1.3.2. General Output  
             1.3.2.1. All command outputs should use consistent spacing and indentation.  
-            1.3.2.2. Error messages must start with "Error: ".  
+            1.3.2.2. Error messages must start with "Error: ". 
+        1.3.3. JSON Format
+            1.3.3.1. number: The section number without a trailing period.
+            1.3.3.2. name: The name of the section.
+            1.3.3.3. content: The text content of the section, stripped of indentation and numbering.
+            1.3.3.4. Level is not included in the output.
+            1.3.3.5. subsections: An array of nested sections defined recursively.
 

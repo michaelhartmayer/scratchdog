@@ -2,7 +2,7 @@ import path from 'path';
 import { execSync } from 'child_process';
 import { parseSpecFile, getSectionsByParent } from './parser.js';
 
-export function diffCommand(file, sectionNumber, options = {}) {
+export async function diffCommand(file, sectionNumber, options = {}) {
   if (options.help) {
     console.log('Usage: npm run specter diff <file> [section]');
     console.log('');
@@ -53,7 +53,7 @@ export function diffCommand(file, sectionNumber, options = {}) {
 
   if (changedLineNumbers.size === 0) {
     if (options.json) {
-      console.log(JSON.stringify([]));
+      console.log(JSON.stringify({ sections: [] }));
     } else {
       console.log('No changes found since last commit.');
     }
@@ -67,7 +67,7 @@ export function diffCommand(file, sectionNumber, options = {}) {
 
   if (changedSections.length === 0) {
     if (options.json) {
-      console.log(JSON.stringify([]));
+      console.log(JSON.stringify({ sections: [] }));
     } else {
       console.log(
         'No changed specification items found in the specified scope.',
@@ -77,13 +77,9 @@ export function diffCommand(file, sectionNumber, options = {}) {
   }
 
   if (options.json) {
-    const sectionsList = changedSections.map((s) => ({
-      number: s.number,
-      name: s.text,
-      level: s.level,
-      content: s.fullLine,
-    }));
-    console.log(JSON.stringify({ sections: sectionsList }, null, 2));
+    const { buildSectionTree } = await import('./parser.js');
+    const sectionsTree = buildSectionTree(changedSections);
+    console.log(JSON.stringify({ sections: sectionsTree }, null, 2));
   } else {
     console.log(
       `Changes in ${file}${sectionNumber ? ` section ${sectionNumber}` : ''}:`,

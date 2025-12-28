@@ -8,6 +8,7 @@
             1.1.2.1. Run unit tests  
             1.1.2.2. Measure code coverage  
             1.1.2.3. Generate test report  
+            1.1.2.4. Exclude e2e directory
         1.1.3. npm run test:e2e:headless  
             1.1.3.1. Run end-to-end tests headless  
             1.1.3.2. Generate test report  

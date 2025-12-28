@@ -1,7 +1,7 @@
 import path from 'path';
 import { parseSpecFile, getSectionsByParent } from './parser.js';
 
-export function specCommand(file, sectionNumber, options = {}) {
+export async function specCommand(file, sectionNumber, options = {}) {
   if (options.help) {
     console.log('Usage: npm run specter spec <file> [section]');
     console.log('');
@@ -42,13 +42,9 @@ export function specCommand(file, sectionNumber, options = {}) {
   }
 
   if (options.json) {
-    const sectionsList = targetSections.map((s) => ({
-      number: s.number,
-      name: s.text,
-      level: s.level,
-      content: s.fullLine,
-    }));
-    console.log(JSON.stringify({ sections: sectionsList }, null, 2));
+    const { buildSectionTree } = await import('./parser.js');
+    const sectionsTree = buildSectionTree(targetSections);
+    console.log(JSON.stringify({ sections: sectionsTree }, null, 2));
   } else {
     console.log(
       `Specification for ${file}${sectionNumber ? ` section ${sectionNumber}` : ''}:`,

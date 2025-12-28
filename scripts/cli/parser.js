@@ -67,3 +67,35 @@ export function getTopLevelSections(sections, parentNumber) {
     (s) => s.level === targetLevel && normalize(s.number).startsWith(prefix),
   );
 }
+
+export function buildSectionTree(sections) {
+  const root = [];
+  const stack = []; // Stores { section, level }
+
+  sections.forEach(section => {
+    // Create the formatted node per 1.3.3 spec
+    const node = {
+      number: normalize(section.number),
+      name: section.text,
+      content: section.text, // Assuming content matches name for now based on spec/test
+      subsections: []
+    };
+
+    const level = section.level;
+
+    // Manage stack to find parent
+    while (stack.length > 0 && stack[stack.length - 1].level >= level) {
+      stack.pop();
+    }
+
+    if (stack.length === 0) {
+      root.push(node);
+    } else {
+      stack[stack.length - 1].node.subsections.push(node);
+    }
+
+    stack.push({ node, level });
+  });
+
+  return root;
+}
