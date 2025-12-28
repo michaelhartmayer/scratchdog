@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PauseMenu } from '../PauseMenu';
+import { Button } from '../DesignSystem/Button';
 import './GameScreen.css';
 
 interface GameScreenProps {
@@ -25,13 +26,13 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
       <div className="hud">HUD TBD</div>
       <div className="game-center">Game TBD</div>
       {/* Temporary button for testing Game Over */}
-      <button
+      <Button
         onClick={onGameOver}
         style={{ position: 'absolute', bottom: 10, right: 10, opacity: 0.5 }}
         data-testid="trigger-game-over"
       >
         Debug: Game Over
-      </button>
+      </Button>
       {paused && (
         <PauseMenu
           onResume={() => setPaused(false)}

@@ -133,6 +133,8 @@
                 * 2.1.1.3.1. All hooks must be in a folder of the same name and exported by an index.ts file    
             * 2.1.1.4. Utilities must be in /src/utils    
                 * 2.1.1.4.1. All utilities must be in a folder of the same name and exported by an index.ts file    
+            * 2.1.1.5. Components are not allowed to use html buttons    
+                * 2.1.1.5.1. The only folder that buttons are allowed in are in /src/components/DesignSystem and child folders    
         * 2.1.2. All custom ESLint rules must be unit tested    
             * 2.1.2.1. All custom ESLint rules must be in .eslint-rules/    
             * 2.1.2.2. Each eslint rule must have its own folder    

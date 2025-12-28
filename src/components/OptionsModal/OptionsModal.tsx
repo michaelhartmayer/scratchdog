@@ -1,3 +1,4 @@
+import { Button } from '../DesignSystem/Button';
 import './OptionsModal.css';
 
 interface OptionsModalProps {
@@ -10,9 +11,9 @@ export const OptionsModal = ({ onClose }: OptionsModalProps) => {
       <div className="modal-container">
         <div className="modal-header">
           <span className="modal-title">Options</span>
-          <button className="close-btn" onClick={onClose}>
+          <Button variant="ghost" className="close-btn" onClick={onClose}>
             X
-          </button>
+          </Button>
         </div>
         <div className="modal-body">
           <div className="modal-section">
@@ -29,8 +30,8 @@ export const OptionsModal = ({ onClose }: OptionsModalProps) => {
           </div>
         </div>
         <div className="modal-footer">
-          <button onClick={onClose}>Back</button>
-          <button onClick={onClose}>Apply</button>
+          <Button variant="secondary" onClick={onClose}>Back</Button>
+          <Button onClick={onClose}>Apply</Button>
         </div>
       </div>
     </div>

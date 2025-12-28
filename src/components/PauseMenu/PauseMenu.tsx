@@ -1,3 +1,4 @@
+import { Button } from '../DesignSystem/Button';
 import './PauseMenu.css';
 
 interface PauseMenuProps {
@@ -10,9 +11,9 @@ export const PauseMenu = ({ onResume, onSave, onMainMenu }: PauseMenuProps) => {
   return (
     <div className="pause-menu-scrim" data-testid="pause-menu">
       <div className="pause-menu-container">
-        <button onClick={onResume}>Resume</button>
-        <button onClick={onSave}>Save Game</button>
-        <button onClick={onMainMenu}>Main Menu</button>
+        <Button onClick={onResume}>Resume</Button>
+        <Button onClick={onSave}>Save Game</Button>
+        <Button variant="secondary" onClick={onMainMenu}>Main Menu</Button>
       </div>
     </div>
   );

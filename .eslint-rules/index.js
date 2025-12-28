@@ -3,6 +3,7 @@ import componentOrganization from './component-organization/rule.js';
 import hookOrganization from './hook-organization/rule.js';
 import utilOrganization from './util-organization/rule.js';
 import noEslintDisable from './no-eslint-disable/rule.js';
+import noHtmlButtons from './no-html-buttons/rule.js';
 
 const plugin = {
   rules: {
@@ -11,6 +12,7 @@ const plugin = {
     'hook-organization': hookOrganization,
     'util-organization': utilOrganization,
     'no-eslint-disable': noEslintDisable,
+    'no-html-buttons': noHtmlButtons,
   },
 };
 

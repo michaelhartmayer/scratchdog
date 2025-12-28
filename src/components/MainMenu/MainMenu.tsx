@@ -1,3 +1,4 @@
+import { Button } from '../DesignSystem/Button';
 import './MainMenu.css';
 
 interface MainMenuProps {
@@ -19,15 +20,15 @@ export const MainMenu = ({
     <div className="main-menu" data-testid="main-menu">
       <h1 className="menu-title">Main Menu</h1>
       <div className="menu-items">
-        <button onClick={onNewGame} className="menu-btn">
+        <Button onClick={onNewGame} className="menu-btn">
           New Game
-        </button>
-        <button disabled={!hasSave} onClick={onContinue} className="menu-btn">
+        </Button>
+        <Button disabled={!hasSave} onClick={onContinue} className="menu-btn">
           Continue Game
-        </button>
-        <button onClick={onOptions} className="menu-btn">
+        </Button>
+        <Button onClick={onOptions} className="menu-btn">
           Options
-        </button>
+        </Button>
       </div>
     </div>
   );
