@@ -2,66 +2,68 @@ import fs from 'fs';
 import path from 'path';
 
 export function parseSpecFile(filePath) {
-    const content = fs.readFileSync(filePath, 'utf8');
-    const lines = content.split('\n');
-    const sections = [];
-    let currentPath = [];
+  const content = fs.readFileSync(filePath, 'utf8');
+  const lines = content.split('\n');
+  const sections = [];
+  let currentPath = [];
 
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const match = line.match(/^(\s*)(\d+(?:\.\d+)*\.?)\s+(.*)$/);
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const match = line.match(/^(\s*)(\d+(?:\.\d+)*\.?)\s+(.*)$/);
 
-        if (match) {
-            const indent = match[1];
-            const number = match[2];
-            const text = match[3].trim();
-            const level = number.split('.').filter(Boolean).length;
+    if (match) {
+      const indent = match[1];
+      const number = match[2];
+      const text = match[3].trim();
+      const level = number.split('.').filter(Boolean).length;
 
-            const section = {
-                number,
-                text,
-                level,
-                lineIndex: i,
-                fullLine: line,
-                children: []
-            };
+      const section = {
+        number,
+        text,
+        level,
+        lineIndex: i,
+        fullLine: line,
+        children: [],
+      };
 
-            sections.push(section);
-        }
+      sections.push(section);
     }
+  }
 
-    return {
-        lines,
-        sections
-    };
+  return {
+    lines,
+    sections,
+  };
 }
 
 export function countSpecLines(sections) {
-    return sections.length;
+  return sections.length;
 }
 
-const normalize = (n) => n.endsWith('.') ? n.slice(0, -1) : n;
+const normalize = (n) => (n.endsWith('.') ? n.slice(0, -1) : n);
 
 export function getSectionsByParent(sections, parentNumber) {
-    if (!parentNumber) return sections;
+  if (!parentNumber) return sections;
 
-    const normParent = normalize(parentNumber);
-    const prefix = normParent + '.';
-    return sections.filter(s => {
-        const normS = normalize(s.number);
-        return normS === normParent || normS.startsWith(prefix);
-    });
+  const normParent = normalize(parentNumber);
+  const prefix = normParent + '.';
+  return sections.filter((s) => {
+    const normS = normalize(s.number);
+    return normS === normParent || normS.startsWith(prefix);
+  });
 }
 
 export function getTopLevelSections(sections, parentNumber) {
-    if (!parentNumber) return sections.filter(s => s.level === 1);
+  if (!parentNumber) return sections.filter((s) => s.level === 1);
 
-    const normParent = normalize(parentNumber);
-    const parent = sections.find(s => normalize(s.number) === normParent);
-    if (!parent) return [];
+  const normParent = normalize(parentNumber);
+  const parent = sections.find((s) => normalize(s.number) === normParent);
+  if (!parent) return [];
 
-    const targetLevel = parent.level + 1;
-    const prefix = normParent + '.';
+  const targetLevel = parent.level + 1;
+  const prefix = normParent + '.';
 
-    return sections.filter(s => s.level === targetLevel && normalize(s.number).startsWith(prefix));
+  return sections.filter(
+    (s) => s.level === targetLevel && normalize(s.number).startsWith(prefix),
+  );
 }
