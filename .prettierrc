@@ -7,7 +7,7 @@
   "plugins": ["./.prettier-plugins/prettier-plugin-spec-indent.js"],
   "overrides": [
     {
-      "files": "spec.md",
+      "files": "*.spec.md",
       "options": {
         "parser": "spec-markdown-parser",
         "tabWidth": 4

@@ -74,32 +74,13 @@ const specIndentPlugin = {
             const indent = ' '.repeat(indentSize);
 
             // Reconstruct with EXACTLY one space between numbering and content
-            acc.push(`${indent}${numbering} ${content}`);
+            // Add two spaces at the end for GitHub soft breaks
+            acc.push(`${indent}${numbering} ${content}  `);
           } else {
             // Non-numbered lines (headers like "# Dev Spec", or unmatched text)
-            // We return them as is, but trimmed?
-            // If we strict trim, we might lose intentional indentation for code blocks.
-            // But the user requirements are seemingly for the spec list items.
-            // For safety with mixed content (headers), let's just return the line processed?
-            // If I trim everything, headers "# Title" work fine.
-            // Multiline descriptions might break if I trim them.
-            // But valid spec lines usually follow the pattern.
-            // Let's rely on the user's "strict" implication.
-            // If it matches a header start "#", keep it.
-            // If it's just text, maybe keep previous indent?
-            // Simplest safe approach: usage of the original line's indentation for non-matches?
-            // BUT, "no tabs", "no extra spaces" applies globally?
-            // Let's assume non-matching lines should just be trimmed or kept as is but likely the user wants clean file.
-            // Let's keep unmatched lines essentially as-is but rtrim?
-            // Or better: Indent them relative to previous? Too complex.
-            // Fallback: Just return the original line (but maybe replace tabs?).
-            // Wait, I trimmed `line` at the start of loop.
-            // If I use `trimmed` here, I lose indentation for non-spec lines.
-            // Let's recover the original indentation for non-spec lines if possible, or just accept that spec.md is highly structured.
-            // The file seems to be pure headers + list.
-            // If I blindly trim non-list lines, standard headers work (# Header).
-            // Let's stick with `trimmed` for everything to enforce "no extra spaces".
-            acc.push(trimmed);
+            // Add two spaces at the end of non-numbered lines as well, unless it's a header
+            const suffix = trimmed.startsWith('#') ? '' : '  ';
+            acc.push(trimmed + suffix);
           }
 
           return acc;
