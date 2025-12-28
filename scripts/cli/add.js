@@ -21,6 +21,7 @@ export async function addCommand(
     console.log(
       'The new item is numbered sequentially after the last existing child of <section>.',
     );
+    console.log("Use '.' (dot) as <section> to explicitly add the item to the root level.");
     console.log('<content> is the text of the new item.');
     console.log('');
     console.log('Options:');
@@ -42,15 +43,23 @@ export async function addCommand(
   }
 
   const { lines, sections } = parseSpecFile(fullPath);
+  const isRoot = sectionNumber === '.';
 
-  const targetParentNorm = normalize(sectionNumber);
-  const parentSection = sections.find(
-    (s) => normalize(s.number) === targetParentNorm,
-  );
+  let targetParentNorm;
+  let parentSection;
 
-  if (!parentSection) {
-    console.error(`Error: Section ${sectionNumber} not found.`);
-    process.exit(1);
+  if (isRoot) {
+    targetParentNorm = null; // Root has no parent number
+  } else {
+    targetParentNorm = normalize(sectionNumber);
+    parentSection = sections.find(
+      (s) => normalize(s.number) === targetParentNorm,
+    );
+
+    if (!parentSection) {
+      console.error(`Error: Section ${sectionNumber} not found.`);
+      process.exit(1);
+    }
   }
 
   const children = getTopLevelSections(sections, targetParentNorm);
@@ -63,41 +72,57 @@ export async function addCommand(
     parts[parts.length - 1] = (lastPart + 1).toString();
     nextNumber = parts.join('.');
   } else {
-    nextNumber = `${targetParentNorm}.1`;
+    // No children (or no top-level items if root)
+    if (isRoot) {
+      nextNumber = '1';
+    } else {
+      nextNumber = `${targetParentNorm}.1`;
+    }
   }
 
   // Determine insertion point
   let insertIndex;
 
-  // Find all descendants to calculate where the block ends
-  const allDescendants = getSectionsByParent(sections, targetParentNorm);
+  if (isRoot) {
+    // If root, we insert after the last section in the file generally?
+    // Or after the last top level item and its descendants.
+    // getSectionsByParent(sections, null) returns ALL sections?
+    // Let's check parser.js: if (!parentNumber) return sections;
+    // So if root, allDescendants is everything.
+    const allDescendants = sections; // effectively
 
-  // We want to insert after the LAST descendant.
-  // Exception: if parent has NO descendants (allDescendants only contains parent? No, getSectionsByParent logic:
-  //   if (!parentNumber) return sections;
-  //   const normParent = normalize(parentNumber);
-  //   const prefix = normParent + '.';
-  //   return sections.filter ... normS === normParent || normS.startsWith(prefix)
-
-  // So allDescendants INCLUDES the parent itself.
-
-  // Filter out the parent itself to check if there are REAL descendants.
-  const realDescendants = allDescendants.filter(
-    (s) => normalize(s.number) !== targetParentNorm,
-  );
-
-  if (realDescendants.length > 0) {
-    const lastDescendant = realDescendants[realDescendants.length - 1];
-    insertIndex = lastDescendant.lineIndex + 1;
+    if (allDescendants.length > 0) {
+      const lastDescendant = allDescendants[allDescendants.length - 1];
+      insertIndex = lastDescendant.lineIndex + 1;
+    } else {
+      // Empty file or just header
+      insertIndex = lines.length;
+    }
   } else {
-    insertIndex = parentSection.lineIndex + 1;
+    // Find all descendants to calculate where the block ends
+    const allDescendants = getSectionsByParent(sections, targetParentNorm);
+
+    // Filter out the parent itself to check if there are REAL descendants.
+    const realDescendants = allDescendants.filter(
+      (s) => normalize(s.number) !== targetParentNorm,
+    );
+
+    if (realDescendants.length > 0) {
+      const lastDescendant = realDescendants[realDescendants.length - 1];
+      insertIndex = lastDescendant.lineIndex + 1;
+    } else {
+      insertIndex = parentSection.lineIndex + 1;
+    }
   }
 
   // Determine indentation
-  // Parent indentation + 4 spaces
-  const indentMatch = parentSection.fullLine.match(/^(\s*)/);
-  const parentIndent = indentMatch ? indentMatch[1] : '';
-  const newIndent = parentIndent + '    ';
+  let newIndent = '';
+  if (!isRoot && parentSection) {
+    const indentMatch = parentSection.fullLine.match(/^(\s*)/);
+    const parentIndent = indentMatch ? indentMatch[1] : '';
+    newIndent = parentIndent + '    ';
+  }
+  // If root, indent is '' (empty).
 
   const newLine = `${newIndent}${nextNumber}. ${newContent}`;
 
