@@ -30,7 +30,9 @@ export const OptionsModal = ({ onClose }: OptionsModalProps) => {
           </div>
         </div>
         <div className="modal-footer">
-          <Button variant="secondary" onClick={onClose}>Back</Button>
+          <Button variant="secondary" onClick={onClose}>
+            Back
+          </Button>
           <Button onClick={onClose}>Apply</Button>
         </div>
       </div>

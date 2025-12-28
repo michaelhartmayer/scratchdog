@@ -13,7 +13,9 @@ export const PauseMenu = ({ onResume, onSave, onMainMenu }: PauseMenuProps) => {
       <div className="pause-menu-container">
         <Button onClick={onResume}>Resume</Button>
         <Button onClick={onSave}>Save Game</Button>
-        <Button variant="secondary" onClick={onMainMenu}>Main Menu</Button>
+        <Button variant="secondary" onClick={onMainMenu}>
+          Main Menu
+        </Button>
       </div>
     </div>
   );
