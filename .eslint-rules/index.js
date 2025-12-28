@@ -9,7 +9,6 @@ import noHtmlP from './no-html-p/rule.js';
 import hookNaming from './hook-naming/rule.js';
 import noUseEffectInComponents from './no-use-effect-in-components/rule.js';
 
-
 const plugin = {
   rules: {
     'one-component-per-file': oneComponentPerFile,
@@ -22,7 +21,6 @@ const plugin = {
     'no-html-p': noHtmlP,
     'hook-naming': hookNaming,
     'no-use-effect-in-components': noUseEffectInComponents,
-
   },
 };
 

@@ -12,6 +12,7 @@
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "spec": "node scripts/generate-spec.js",
+    "specter": "node scripts/cli/index.js",
     "test:unit": "vitest run --coverage",
     "test:e2e:headless": "playwright test",
     "test:e2e:headed": "playwright test --headed",

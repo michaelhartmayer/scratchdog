@@ -9,7 +9,11 @@ interface SplashScreenProps {
 export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   const [fadingOut, setFadingOut] = useState(false);
 
-  const { handleInteraction } = useSplashScreen(fadingOut, setFadingOut, onComplete);
+  const { handleInteraction } = useSplashScreen(
+    fadingOut,
+    setFadingOut,
+    onComplete,
+  );
 
   return (
     <div
