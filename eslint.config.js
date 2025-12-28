@@ -32,6 +32,7 @@ export default tseslint.config(
       'local-rules/no-eslint-disable': 'error',
       'local-rules/no-html-buttons': 'error',
       'local-rules/no-html-headings': 'error',
+      'local-rules/no-html-p': 'error',
     },
   },
 );
