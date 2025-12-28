@@ -59,6 +59,8 @@
             9.5.1.2. do not use tabs
             9.5.1.3. do not use extra spaces
             9.5.1.4. do not use extra newlines
+10. Husky
+    10.1. P
 
 # Specification
 
