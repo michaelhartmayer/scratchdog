@@ -23,15 +23,30 @@ function displayGeneralHelp() {
   console.log('Commands:');
 
   const commands = [
-    { name: 'list [folder]', desc: 'Lists all *.spec.md files in the folder (defaults to "specifications")' },
-    { name: 'toc <file> [section]', desc: 'Displays the table of contents for a spec file' },
-    { name: 'spec <file> [section]', desc: 'Displays the specification for a file or section' },
-    { name: 'diff <file> [section]', desc: 'Displays changes in a spec file since the last commit' },
-    { name: 'edit <file> <section> <content>', desc: 'Updates the content of a spec section' },
-    { name: 'help', desc: 'Displays this help message' }
+    {
+      name: 'list [folder]',
+      desc: 'Lists all *.spec.md files in the folder (defaults to "specifications")',
+    },
+    {
+      name: 'toc <file> [section]',
+      desc: 'Displays the table of contents for a spec file',
+    },
+    {
+      name: 'spec <file> [section]',
+      desc: 'Displays the specification for a file or section',
+    },
+    {
+      name: 'diff <file> [section]',
+      desc: 'Displays changes in a spec file since the last commit',
+    },
+    {
+      name: 'edit <file> <section> <content>',
+      desc: 'Updates the content of a spec section',
+    },
+    { name: 'help', desc: 'Displays this help message' },
   ];
 
-  commands.forEach(cmd => {
+  commands.forEach((cmd) => {
     console.log(`  ${cmd.name.padEnd(35)}${cmd.desc}`);
   });
 

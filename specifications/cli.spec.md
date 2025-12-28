@@ -41,23 +41,23 @@
         1.1.5. help  
             1.1.5.1. Displays the help message for the cli.  
             1.1.5.2. Output is formatted as a list of commands.  
-                1.1.5.2.1. Each command is displayed with its name and description.
-        1.1.6. edit <file> <section> <content>
-            1.1.6.1. Updates the content of the specified <section> in <file> with <content>.
-            1.1.6.2. <content> replaces the existing specification text.
-            1.1.6.3. <section> must be a valid existing section.
+                1.1.5.2.1. Each command is displayed with its name and description.  
+        1.1.6. edit <file> <section> <content>  
+            1.1.6.1. Updates the content of the specified <section> in <file> with <content>.  
+            1.1.6.2. <content> replaces the existing specification text.  
+            1.1.6.3. <section> must be a valid existing section.  
             1.1.6.4. --help flag displays the help message for the edit command.  
     1.2. Package  
         1.2.1. Cli will live in /scripts/cli  
         1.2.2. JSON test item  
-    1.3. CLI Text Output Standards
-        1.3.1. Help Text
-            1.3.1.1. Usage string must follow the format `Usage: npm run specter <command> [args]`
-            1.3.1.2. Command list must be aligned.
-                1.3.1.2.1. Command names and arguments column must be padded to a fixed width of 35 characters.
-                1.3.1.2.2. Descriptions must start aligned after the padding.
-            1.3.1.3. Arguments must use `<>` for required and `[]` for optional parameters.
-        1.3.2. General Output
-            1.3.2.1. All command outputs should use consistent spacing and indentation.
-            1.3.2.2. Error messages must start with "Error: ".
+    1.3. CLI Text Output Standards  
+        1.3.1. Help Text  
+            1.3.1.1. Usage string must follow the format `Usage: npm run specter <command> [args]`  
+            1.3.1.2. Command list must be aligned.  
+                1.3.1.2.1. Command names and arguments column must be padded to a fixed width of 35 characters.  
+                1.3.1.2.2. Descriptions must start aligned after the padding.  
+            1.3.1.3. Arguments must use `<>` for required and `[]` for optional parameters.  
+        1.3.2. General Output  
+            1.3.2.1. All command outputs should use consistent spacing and indentation.  
+            1.3.2.2. Error messages must start with "Error: ".  
 
