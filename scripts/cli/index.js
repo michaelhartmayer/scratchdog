@@ -4,6 +4,7 @@ import { listCommand } from './list.js';
 import { tocCommand } from './toc.js';
 import { specCommand } from './display.js';
 import { diffCommand } from './diff.js';
+import { editCommand } from './edit.js';
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -20,19 +21,20 @@ function displayGeneralHelp() {
   console.log('Usage: npm run specter <command> [args]');
   console.log('');
   console.log('Commands:');
-  console.log(
-    '  list [folder]          Lists all *.spec.md files in the folder (defaults to "specifications")',
-  );
-  console.log(
-    '  toc <file> [section]   Displays the table of contents for a spec file',
-  );
-  console.log(
-    '  spec <file> [section]  Displays the specification for a file or section',
-  );
-  console.log(
-    '  diff <file> [section]  Displays changes in a spec file since the last commit',
-  );
-  console.log('  help                   Displays this help message');
+
+  const commands = [
+    { name: 'list [folder]', desc: 'Lists all *.spec.md files in the folder (defaults to "specifications")' },
+    { name: 'toc <file> [section]', desc: 'Displays the table of contents for a spec file' },
+    { name: 'spec <file> [section]', desc: 'Displays the specification for a file or section' },
+    { name: 'diff <file> [section]', desc: 'Displays changes in a spec file since the last commit' },
+    { name: 'edit <file> <section> <content>', desc: 'Updates the content of a spec section' },
+    { name: 'help', desc: 'Displays this help message' }
+  ];
+
+  commands.forEach(cmd => {
+    console.log(`  ${cmd.name.padEnd(35)}${cmd.desc}`);
+  });
+
   console.log('');
   console.log(
     'Use "npm run specter <command> --help" for more information on a specific command.',
@@ -57,8 +59,16 @@ switch (command) {
   case 'diff':
     diffCommand(positionalArgs[1], positionalArgs[2], options);
     break;
+  case 'edit':
+    editCommand(
+      positionalArgs[1],
+      positionalArgs[2],
+      positionalArgs.slice(3).join(' '),
+      options,
+    );
+    break;
   default:
-    console.error(`Unknown command: ${command}`);
+    console.error(`Error: Unknown command: ${command}`);
     displayGeneralHelp();
     process.exit(1);
 }

@@ -4,7 +4,7 @@ import { parseSpecFile, countSpecLines } from './parser.js';
 
 export function listCommand(folder = 'specifications', options = {}) {
   if (options.help) {
-    console.log('Usage: npm run specter list <folder>');
+    console.log('Usage: npm run specter list [folder]');
     console.log('');
     console.log(
       'Lists all specification files in the specified folder, recursively.',

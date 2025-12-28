@@ -99,7 +99,7 @@
 
 * 1. CLI that can be used with npm run specter <command> <args>    
     * 1.1. Commands    
-        * 1.1.1. list <folder>    
+        * 1.1.1. list [folder]    
             * 1.1.1.1. Lists all specification files in the <folder> folder, recursively.    
             * 1.1.1.2. If no arguments are provided, lists all specification files    
                 * 1.1.1.2.1. Specification files are identified as *.spec.md    
@@ -109,7 +109,7 @@
                 * 1.1.1.4.2. Each file is displayed with its number of total specification lines.    
             * 1.1.1.5. --help flag displays the help message for the list command.    
             * 1.1.1.6. --json flag displays the list as a JSON object.    
-        * 1.1.2. toc <file>    
+        * 1.1.2. toc <file> [section]    
             * 1.1.2.1. Displays the table of contents for the <file> file.    
             * 1.1.2.2. <section> is optional and defaults to the entire file.    
             * 1.1.2.3. List is limited to the top level sections of the level specified by <section>, and does not show any nested sections.    
@@ -118,7 +118,7 @@
             * 1.1.2.5. --help flag displays the help message for the toc command.    
             * 1.1.2.6. <section> may incude a trailing period or not.    
             * 1.1.2.7. --json flag displays the toc as a JSON object.    
-        * 1.1.3. spec <file> <section>    
+        * 1.1.3. spec <file> [section]    
             * 1.1.3.1. Displays the specification for the <file> file.    
             * 1.1.3.2. <section> is optional and defaults to the entire file.    
             * 1.1.3.3. List includes all nested sections of the specified section.    
@@ -126,7 +126,7 @@
             * 1.1.3.5. --help flag displays the help message for the spec command.    
             * 1.1.3.6. <section> may incude a trailing period or not.    
             * 1.1.3.7. --json flag displays the spec as a JSON object.    
-        * 1.1.4. diff <file> <section>    
+        * 1.1.4. diff <file> [section]    
             * 1.1.4.1. Displays the specification for the <file> file.    
             * 1.1.4.2. <section> is optional and defaults to the entire file.    
             * 1.1.4.3. List includes all nested sections of the specified section.    
@@ -139,9 +139,24 @@
             * 1.1.5.1. Displays the help message for the cli.    
             * 1.1.5.2. Output is formatted as a list of commands.    
                 * 1.1.5.2.1. Each command is displayed with its name and description.    
+        * 1.1.6. edit <file> <section> <content>    
+            * 1.1.6.1. Updates the content of the specified <section> in <file> with <content>.    
+            * 1.1.6.2. <content> replaces the existing specification text.    
+            * 1.1.6.3. <section> must be a valid existing section.    
+            * 1.1.6.4. --help flag displays the help message for the edit command.    
     * 1.2. Package    
         * 1.2.1. Cli will live in /scripts/cli    
         * 1.2.2. JSON test item    
+    * 1.3. CLI Text Output Standards    
+        * 1.3.1. Help Text    
+            * 1.3.1.1. Usage string must follow the format `Usage: npm run specter <command> [args]`    
+            * 1.3.1.2. Command list must be aligned.    
+                * 1.3.1.2.1. Command names and arguments column must be padded to a fixed width of 35 characters.    
+                * 1.3.1.2.2. Descriptions must start aligned after the padding.    
+            * 1.3.1.3. Arguments must use `<>` for required and `[]` for optional parameters.    
+        * 1.3.2. General Output    
+            * 1.3.2.1. All command outputs should use consistent spacing and indentation.    
+            * 1.3.2.2. Error messages must start with "Error: ".    
 
 
 
