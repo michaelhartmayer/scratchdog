@@ -3,18 +3,18 @@ import react from '@vitejs/plugin-react';
 import type { InlineConfig } from 'vitest/node';
 
 interface VitestConfigExport extends UserConfig {
-    test?: InlineConfig;
+  test?: InlineConfig;
 }
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [react()],
-    test: {
-        environment: 'jsdom',
-        globals: true,
-        setupFiles: './src/test/setup.ts',
-    },
-    server: {
-        port: 8023,
-    },
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './src/test/setup.ts',
+  },
+  server: {
+    port: 8023,
+  },
 } as VitestConfigExport);

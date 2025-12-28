@@ -5,13 +5,13 @@ import utilOrganization from './util-organization/rule.js';
 import noEslintDisable from './no-eslint-disable/rule.js';
 
 const plugin = {
-    rules: {
-        'one-component-per-file': oneComponentPerFile,
-        'component-organization': componentOrganization,
-        'hook-organization': hookOrganization,
-        'util-organization': utilOrganization,
-        'no-eslint-disable': noEslintDisable,
-    },
+  rules: {
+    'one-component-per-file': oneComponentPerFile,
+    'component-organization': componentOrganization,
+    'hook-organization': hookOrganization,
+    'util-organization': utilOrganization,
+    'no-eslint-disable': noEslintDisable,
+  },
 };
 
 export default plugin;
