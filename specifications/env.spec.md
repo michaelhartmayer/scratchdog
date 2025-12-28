@@ -43,9 +43,9 @@
             2.1.1.5. Components are not allowed to use html buttons  
                 2.1.1.5.1. The only folder that buttons are allowed in are in /src/components/DesignSystem and child folders  
             2.1.1.6 Components are not allowed to use html h1-h6 tags  
-                2.1.1.6.1. The only folder that h1-h6 tags are allowed in are in /src/components/DesignSystem and child folders
-            2.1.1.7 Components are not allowed to use html p tags
-                2.1.1.7.1. The only folder that p tags are allowed in are in /src/components/DesignSystem and child folders
+                2.1.1.6.1. The only folder that h1-h6 tags are allowed in are in /src/components/DesignSystem and child folders  
+            2.1.1.7 Components are not allowed to use html p tags  
+                2.1.1.7.1. The only folder that p tags are allowed in are in /src/components/DesignSystem and child folders  
         2.1.2. All custom ESLint rules must be unit tested  
             2.1.2.1. All custom ESLint rules must be in .eslint-rules/  
             2.1.2.2. Each eslint rule must have its own folder  
