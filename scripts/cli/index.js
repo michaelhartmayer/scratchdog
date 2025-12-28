@@ -43,6 +43,10 @@ function displayGeneralHelp() {
       name: 'edit <file> <section> <content>',
       desc: 'Updates the content of a spec section',
     },
+    {
+      name: 'add <file> <section> <content>',
+      desc: 'Appends a new specification item',
+    },
     { name: 'help', desc: 'Displays this help message' },
   ];
 
@@ -76,6 +80,15 @@ switch (command) {
     break;
   case 'edit':
     editCommand(
+      positionalArgs[1],
+      positionalArgs[2],
+      positionalArgs.slice(3).join(' '),
+      options,
+    );
+    break;
+  case 'add':
+    const { addCommand } = await import('./add.js');
+    addCommand(
       positionalArgs[1],
       positionalArgs[2],
       positionalArgs.slice(3).join(' '),

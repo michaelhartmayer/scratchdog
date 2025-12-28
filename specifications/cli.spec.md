@@ -47,6 +47,13 @@
             1.1.6.2. <content> replaces the existing specification text.  
             1.1.6.3. <section> must be a valid existing section.  
             1.1.6.4. --help flag displays the help message for the edit command.  
+        1.1.7. add <file> <section> <content>
+            1.1.7.1. Appends a new specification item to the <section> in <file>.
+            1.1.7.2. The new item is numbered sequentially after the last existing child of <section>.
+            1.1.7.3. <content> is the text of the new item.
+            1.1.7.4. --help flag displays the help message for the add command.
+            1.1.7.5. Output returns the updated section as if running the toc command on the new item.
+            1.1.7.6. --json flag displays the added item as a JSON object, following the standard format.
     1.2. Package  
         1.2.1. Cli will live in /scripts/cli  
         1.2.2. JSON test item  
@@ -59,11 +66,11 @@
             1.3.1.3. Arguments must use `<>` for required and `[]` for optional parameters.  
         1.3.2. General Output  
             1.3.2.1. All command outputs should use consistent spacing and indentation.  
-            1.3.2.2. Error messages must start with "Error: ". 
-        1.3.3. JSON Format
-            1.3.3.1. number: The section number without a trailing period.
-            1.3.3.2. name: The name of the section.
-            1.3.3.3. content: The text content of the section, stripped of indentation and numbering.
-            1.3.3.4. Level is not included in the output.
-            1.3.3.5. subsections: An array of nested sections defined recursively.
+            1.3.2.2. Error messages must start with "Error: ".  
+        1.3.3. JSON Format  
+            1.3.3.1. number: The section number without a trailing period.  
+            1.3.3.2. name: The name of the section.  
+            1.3.3.3. content: The text content of the section, stripped of indentation and numbering.  
+            1.3.3.4. Level is not included in the output.  
+            1.3.3.5. subsections: An array of nested sections defined recursively.  
 

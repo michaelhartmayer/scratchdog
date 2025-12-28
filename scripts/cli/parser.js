@@ -40,7 +40,7 @@ export function countSpecLines(sections) {
   return sections.length;
 }
 
-const normalize = (n) => (n.endsWith('.') ? n.slice(0, -1) : n);
+export const normalize = (n) => (n.endsWith('.') ? n.slice(0, -1) : n);
 
 export function getSectionsByParent(sections, parentNumber) {
   if (!parentNumber) return sections;
@@ -72,13 +72,13 @@ export function buildSectionTree(sections) {
   const root = [];
   const stack = []; // Stores { section, level }
 
-  sections.forEach(section => {
+  sections.forEach((section) => {
     // Create the formatted node per 1.3.3 spec
     const node = {
       number: normalize(section.number),
       name: section.text,
       content: section.text, // Assuming content matches name for now based on spec/test
-      subsections: []
+      subsections: [],
     };
 
     const level = section.level;
