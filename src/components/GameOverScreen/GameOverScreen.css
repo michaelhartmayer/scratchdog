@@ -1,0 +1,50 @@
+.game-over-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+  /* We assume we start transparent on top of game if we want "fade to black" visual? 
+       Or just start black. Spec 4.1 "Screen fades to black". 
+       If we navigate here, render pure black immediately with animation? */
+  animation: fadeToBlack 2s forwards;
+}
+
+@keyframes fadeToBlack {
+  from {
+    opacity: 0;
+    background-color: transparent;
+  }
+
+  to {
+    opacity: 1;
+    background-color: black;
+  }
+}
+
+.game-over-text {
+  font-size: 4rem;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 2s;
+}
+
+.game-over-text.phase-1 {
+  opacity: 1;
+  /* Show text */
+}
+
+.game-over-text.phase-2 {
+  opacity: 0;
+  /* Fade out text (screen is black) */
+}
+
+.game-over-text.phase-3 {
+  opacity: 0;
+}

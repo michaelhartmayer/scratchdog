@@ -1,0 +1,16 @@
+{
+  "semi": true,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "printWidth": 80,
+  "tabWidth": 2,
+  "plugins": ["./.prettier-plugins/prettier-plugin-spec-indent.js"],
+  "overrides": [
+    {
+      "files": "spec.md",
+      "options": {
+        "parser": "spec-markdown-parser"
+      }
+    }
+  ]
+}
