@@ -45,4 +45,22 @@
     4.3. The screen fades to black for 2 seconds  
     4.4. After the fade out, return to the main menu  
     4.5. Any key or mouse click will return to the main menu  
-
+5. Glass Casual Gamer Theme
+    5.1. A detailed description of the theme, the way it looks, feels, and behaves it outlined.
+        5.1.1. Colors are outlined
+        5.1.2. Typography is outlined
+        5.1.3. Common UI elements are outlined
+        5.1.4. Transitions are outlined
+        5.1.5. Interactions are outlined
+        5.1.6. Visual states are outlined
+        5.1.7. Responsive behavior is outlined
+        5.1.8. Performance is outlined
+        5.1.9. Accessibility is outlined
+    5.2. The theme is responsive and adaptive
+        5.2.1. The theme is designed for desktop
+        5.2.2. The theme is designed for mobile
+        5.2.3. The theme is designed for tablet
+    5.3. The documentation is maintained in /docs/theme.md
+        
+        
+        

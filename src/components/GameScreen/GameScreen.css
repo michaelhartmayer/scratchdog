@@ -19,9 +19,12 @@
   width: 100%;
   text-align: center;
   color: white;
+  font-family: monospace;
+  /* Debug text */
 }
 
 .game-center {
   color: white;
   font-size: 2rem;
+  text-align: center;
 }

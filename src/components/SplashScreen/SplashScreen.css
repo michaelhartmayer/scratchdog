@@ -4,19 +4,21 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: black;
-  color: white;
+  background-color: var(--bg-midnight);
+  color: var(--text-primary);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   transition: opacity 1s ease-in-out;
+  text-align: center;
+  padding: 20px;
 }
 
 .splash-screen.fade-in {
   opacity: 1;
-  animation: fadeIn 1s ease-in-out;
+  animation: fadeIn 2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .splash-screen.fade-out {
@@ -24,23 +26,47 @@
 }
 
 .splash-title {
-  font-size: 4rem;
-  font-weight: bold;
+  font-size: clamp(3rem, 10vw, 6rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.3));
+  margin-bottom: 2rem;
 }
 
 .splash-footer {
   position: absolute;
-  bottom: 2rem;
-  font-size: 1.2rem;
-  opacity: 0.8;
+  bottom: 4rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  animation: pulse 2s infinite ease-in-out;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
+    transform: scale(0.95);
   }
 
   to {
     opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 0.8;
   }
 }
