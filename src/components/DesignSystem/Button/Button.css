@@ -1,72 +1,76 @@
 .ds-button {
-    padding: 12px 24px;
-    font-size: 1rem;
-    font-weight: 600;
-    font-family: var(--font-body);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid transparent;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
 }
 
 /* Primary Variant */
 .ds-button--primary {
-    background: linear-gradient(135deg, var(--accent-primary), color-mix(in srgb, var(--accent-primary) 80%, black));
-    color: var(--text-primary);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow:
-        0 4px 12px rgba(0, 0, 0, 0.4),
-        0 0 20px rgba(139, 92, 246, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(
+    135deg,
+    var(--accent-primary),
+    color-mix(in srgb, var(--accent-primary) 80%, black)
+  );
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(139, 92, 246, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .ds-button--primary:hover:not(:disabled) {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow:
-        0 8px 24px rgba(0, 0, 0, 0.5),
-        0 0 40px rgba(139, 92, 246, 0.3);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(139, 92, 246, 0.3);
 }
 
 .ds-button--primary:active:not(:disabled) {
-    transform: translateY(0) scale(0.98);
+  transform: translateY(0) scale(0.98);
 }
 
 /* Secondary Variant */
 .ds-button--secondary {
-    background: var(--glass-fill);
-    color: var(--text-primary);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(8px);
+  background: var(--glass-fill);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(8px);
 }
 
 .ds-button--secondary:hover:not(:disabled) {
-    background: var(--glass-fill-hover);
-    border-color: var(--accent-primary);
-    transform: translateY(-2px);
+  background: var(--glass-fill-hover);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
 }
 
 /* Ghost Variant */
 .ds-button--ghost {
-    background: transparent;
-    color: var(--text-primary);
-    border: none;
+  background: transparent;
+  color: var(--text-primary);
+  border: none;
 }
 
 .ds-button--ghost:hover:not(:disabled) {
-    background: var(--glass-fill);
+  background: var(--glass-fill);
 }
 
 /* Disabled State */
 .ds-button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    filter: grayscale(50%);
-    transform: none !important;
-    box-shadow: none !important;
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(50%);
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 /* Focus State */
 .ds-button:focus-visible {
-    outline: 2px solid var(--accent-primary);
-    outline-offset: 2px;
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
