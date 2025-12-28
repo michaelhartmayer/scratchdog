@@ -13,7 +13,8 @@
     "format:fix": "prettier --write .",
     "test:unit": "vitest run --coverage",
     "test:e2e:headless": "playwright test",
-    "test:e2e:headed": "playwright test --headed"
+    "test:e2e:headed": "playwright test --headed",
+    "prepare": "husky"
   },
   "dependencies": {
     "pixi.js": "^8.0.0",
@@ -35,6 +36,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
+    "husky": "^9.1.7",
     "jsdom": "^25.0.1",
     "prettier": "^3.4.2",
     "typescript": "~5.6.2",
