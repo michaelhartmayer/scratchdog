@@ -99,6 +99,8 @@
             * 1.1.8.1. Run Prettier and report    
         * 1.1.9. npm run format:fix    
             * 1.1.9.1. Run Prettier and fix    
+        * 1.1.10. npm run spec    
+            * 1.1.10.1. Run SPEC.md generator    
 * 2. ESLint    
     * 2.1. Rules    
         * 2.1.1. Specific Rules    

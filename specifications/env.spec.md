@@ -25,7 +25,9 @@
         1.1.8. npm run format  
             1.1.8.1. Run Prettier and report  
         1.1.9. npm run format:fix  
-            1.1.9.1. Run Prettier and fix  
+            1.1.9.1. Run Prettier and fix
+        1.1.10. npm run spec  
+            1.1.10.1. Run SPEC.md generator  
 2. ESLint  
     2.1. Rules  
         2.1.1. Specific Rules  
@@ -65,14 +67,12 @@
 10. Husky  
     10.1. Pre-commit hooks  
         10.1.1. Run ESLint and Fix  
-        10.1.2. Run Prettier and Fix
-        10.1.3. Scripts
-            10.1.3.1. Run the [SPEC.md](Environment Specification.11) generator
-11. SPEC.md Generator
-    11.1. Dynamically reads all specification markdown files located in the specifications folder and creates a single top-level SPEC.md file
-        11.1.1. The SPEC.md file is created in the root of the project
-        11.1.2. The SPEC.md file is designed to look really good in a markdown viewer (specifically GitHub)
+        10.1.2. Run Prettier and Fix  
+        10.1.3. Scripts  
+            10.1.3.1. Run the [SPEC.md](Environment Specification.11) generator  
+11. SPEC.md Generator  
+    11.1. Dynamically reads all specification markdown files located in the specifications folder and creates a single top-level SPEC.md file  
+        11.1.1. The SPEC.md file is created in the root of the project  
+        11.1.2. The SPEC.md file is designed to look really good in a markdown viewer (specifically GitHub)  
         11.1.3. HTML is used to create a table of contents
-
-            
 
