@@ -29,6 +29,7 @@ export default tseslint.config(
       'local-rules/component-organization': 'warn',
       'local-rules/hook-organization': 'warn',
       'local-rules/util-organization': 'warn',
+      'local-rules/no-eslint-disable': 'error',
     },
   },
 );

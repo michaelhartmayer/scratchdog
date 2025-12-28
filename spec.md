@@ -42,6 +42,8 @@
             2.1.2.1. All custom ESLint rules must be in .eslint-rules/
             2.1.2.2. Each eslint rule must have its own folder
             2.1.2.3. Each eslint rule must have its tests written in its respective folder
+        2.1.3. ESLint rules may not be disabled
+        2.1.4. ESLint rules may not be ignored
 3. Vite
 4. PixiJS
 5. React
@@ -111,4 +113,6 @@
     4.3. The screen fades to black for 2 seconds
     4.4. After the fade out, return to the main menu
     4.5. Any key or mouse click will return to the main menu
+
+        
 

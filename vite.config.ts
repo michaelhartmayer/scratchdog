@@ -1,17 +1,20 @@
-/// <reference types="vitest" />
-import { defineConfig } from 'vite';
+import { defineConfig, type UserConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import type { InlineConfig } from 'vitest/node';
+
+interface VitestConfigExport extends UserConfig {
+    test?: InlineConfig;
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: './src/test/setup.ts',
-  },
-  server: {
-    port: 8023,
-  },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as any);
+    plugins: [react()],
+    test: {
+        environment: 'jsdom',
+        globals: true,
+        setupFiles: './src/test/setup.ts',
+    },
+    server: {
+        port: 8023,
+    },
+} as VitestConfigExport);
