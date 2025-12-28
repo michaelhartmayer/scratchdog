@@ -6,6 +6,9 @@ import noEslintDisable from './no-eslint-disable/rule.js';
 import noHtmlButtons from './no-html-buttons/rule.js';
 import noHtmlHeadings from './no-html-headings/rule.js';
 import noHtmlP from './no-html-p/rule.js';
+import hookNaming from './hook-naming/rule.js';
+import noUseEffectInComponents from './no-use-effect-in-components/rule.js';
+
 
 const plugin = {
   rules: {
@@ -17,6 +20,9 @@ const plugin = {
     'no-html-buttons': noHtmlButtons,
     'no-html-headings': noHtmlHeadings,
     'no-html-p': noHtmlP,
+    'hook-naming': hookNaming,
+    'no-use-effect-in-components': noUseEffectInComponents,
+
   },
 };
 

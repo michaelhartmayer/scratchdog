@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { PauseMenu } from '../PauseMenu';
 import { Button } from '../DesignSystem/Button';
+import { useGameScreen } from '../../hooks/useGameScreen';
 import './GameScreen.css';
 
 interface GameScreenProps {
@@ -11,15 +12,7 @@ interface GameScreenProps {
 export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
   const [paused, setPaused] = useState(false);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setPaused(true);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  useGameScreen(setPaused);
 
   return (
     <div className="game-screen fade-in" data-testid="game-screen">

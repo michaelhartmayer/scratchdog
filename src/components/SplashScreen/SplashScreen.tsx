@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useSplashScreen } from '../../hooks/useSplashScreen';
 import './SplashScreen.css';
 
 interface SplashScreenProps {
@@ -8,33 +9,7 @@ interface SplashScreenProps {
 export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   const [fadingOut, setFadingOut] = useState(false);
 
-  useEffect(() => {
-    // Start fade out after some time
-    const timer = setTimeout(() => {
-      setFadingOut(true);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (fadingOut) {
-      const timer = setTimeout(() => {
-        onComplete();
-      }, 1000); // 1s fade out
-      return () => clearTimeout(timer);
-    }
-  }, [fadingOut, onComplete]);
-
-  const handleInteraction = useCallback(() => {
-    onComplete();
-  }, [onComplete]);
-
-  useEffect(() => {
-    const handleKeyDown = () => handleInteraction();
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleInteraction]);
+  const { handleInteraction } = useSplashScreen(fadingOut, setFadingOut, onComplete);
 
   return (
     <div

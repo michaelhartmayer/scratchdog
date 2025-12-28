@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useRouting } from './hooks/useRouting';
+
 import { SplashScreen } from './components/SplashScreen';
 import { MainMenu } from './components/MainMenu';
 import { GameScreen } from './components/GameScreen';
@@ -12,12 +14,7 @@ function App() {
   const [screen, setScreen] = useState<Screen>('SPLASH');
   const [showOptions, setShowOptions] = useState(false);
 
-  // Simple routing for /design-system
-  useEffect(() => {
-    if (window.location.pathname === '/design-system') {
-      setScreen('DESIGN_SYSTEM');
-    }
-  }, []);
+  useRouting(setScreen);
 
   if (screen === 'DESIGN_SYSTEM') {
     return <DesignSystemPage />;

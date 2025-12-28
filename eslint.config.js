@@ -33,6 +33,9 @@ export default tseslint.config(
       'local-rules/no-html-buttons': 'error',
       'local-rules/no-html-headings': 'error',
       'local-rules/no-html-p': 'error',
+      'local-rules/hook-naming': 'error',
+      'local-rules/no-use-effect-in-components': 'error',
+
     },
   },
 );
