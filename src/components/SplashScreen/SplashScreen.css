@@ -29,7 +29,11 @@
   font-size: clamp(3rem, 10vw, 6rem);
   font-weight: 700;
   letter-spacing: -0.04em;
-  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--text-primary) 0%,
+    var(--accent-primary) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.3));
@@ -60,7 +64,6 @@
 }
 
 @keyframes pulse {
-
   0%,
   100% {
     opacity: 0.4;
