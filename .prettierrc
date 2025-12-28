@@ -9,7 +9,8 @@
     {
       "files": "spec.md",
       "options": {
-        "parser": "spec-markdown-parser"
+        "parser": "spec-markdown-parser",
+        "tabWidth": 4
       }
     }
   ]
