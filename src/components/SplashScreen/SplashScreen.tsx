@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import './SplashScreen.css';
 
 interface SplashScreenProps {
@@ -26,15 +26,15 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
     }
   }, [fadingOut, onComplete]);
 
-  const handleInteraction = () => {
+  const handleInteraction = useCallback(() => {
     onComplete();
-  };
+  }, [onComplete]);
 
   useEffect(() => {
     const handleKeyDown = () => handleInteraction();
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [handleInteraction]);
 
   return (
     <div

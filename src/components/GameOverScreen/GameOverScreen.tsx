@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import './GameOverScreen.css';
 
 interface GameOverScreenProps {
@@ -41,15 +41,15 @@ export const GameOverScreen = ({ onMainMenu }: GameOverScreenProps) => {
     };
   }, [onMainMenu]);
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     onMainMenu();
-  };
+  }, [onMainMenu]);
 
   useEffect(() => {
     const handleKeyDown = () => handleClick();
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [handleClick]);
 
   return (
     <div
