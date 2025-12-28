@@ -19,7 +19,9 @@ export const MainMenu = ({
 
   return (
     <div className="main-menu" data-testid="main-menu">
-      <Text variant="hero" className="menu-title">Main Menu</Text>
+      <Text variant="hero" className="menu-title">
+        Main Menu
+      </Text>
       <div className="menu-items">
         <Button onClick={onNewGame} className="menu-btn">
           New Game
