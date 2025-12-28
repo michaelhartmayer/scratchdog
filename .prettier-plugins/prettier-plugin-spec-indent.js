@@ -24,52 +24,88 @@ const specIndentPlugin = {
       print: (path) => {
         const text = path.node.content;
         const lines = text.split('\n');
-        const formattedLines = lines.map((line) => {
-          const trimmed = line.trimStart();
 
-          // Match lines starting with numbers like "1.", "1.1.", "1.1.1."
-          // We want to capture the numbering part.
-          // Regex: Start of string, followed by digits, dots, digits... ending with a dot and space?
-          // The spec examples have "1. NodeJS", "1.1. Commands"
-          const match = trimmed.match(/^(\d+(\.\d+)*)(\.?)(?=\s|$)/);
+        let previousLineWasEmpty = false;
 
-          if (match) {
-            // match[1] is the number part like "1" or "1.1" or "1.1.1"
-            // Split by dot to count levels
-            const textPart = match[1];
-            // Split by '.'
-            // "1" -> ["1"] -> length 1 -> indent 0
-            // "1.1" -> ["1", "1"] -> length 2 -> indent 3
-            // "1.1.1" -> ["1", "1", "1"] -> length 3 -> indent 6
-            const level = textPart.split('.').filter(Boolean).length;
+        const formattedLines = lines.reduce((acc, line) => {
+          const trimmed = line.trim(); // Trim both ends
 
-            // Indentation rule: (level - 1) * 3 spaces
-            const indentSize = Math.max(0, (level - 1) * 3);
-            const indent = ' '.repeat(indentSize);
-
-            return indent + trimmed;
+          if (!trimmed) {
+            // Empty line handling for "no extra newlines"
+            if (previousLineWasEmpty) {
+              // Skip if previous was also empty (collapse)
+              return acc;
+            }
+            // Keep one empty line
+            previousLineWasEmpty = true;
+            acc.push('');
+            return acc;
           }
 
-          // For lines that don't match (empty, headers without numbers, regular text)
-          // We should probably preserve existing relative indentation or just trimmed?
-          // If it's a continuation of a section text, it might need indentation.
-          // However, the spec seems to be single-line items mostly.
-          // Let's assume we preserve the indentation of non-numbered lines relative to the previous one?
-          // Or just leave them alone?
-          // If I trim them, I might break nested lists or code blocks.
-          // Given the specific requirement "spec.md files properly indent specifications by sub-section",
-          // and the file structure is mostly a list of items.
-          // Let's try to just preserve the current indentation for non-numbered lines,
-          // OR, safely, just return the line as serves if it's not a numbered list item.
-          // BUT, if the user indents a numbered item, we want to force it.
-          // If I only touch matched lines, I satisfy the requirement.
-          // But if the sub-text is indented, and I change the parent, visual alignment breaks.
-          // Let's stick to ONLY modifying lines that start with the numbering pattern.
+          previousLineWasEmpty = false;
 
-          return line;
-        });
+          // Match lines starting with numbers like "1.", "1.1.", "1.1.1."
+          // Capture #1: The numbering (e.g., "1.1.")
+          // Capture #2: The text content
+          // Regex:
+          // ^          Start
+          // (\d+(?:\.\d+)*\.?)  Capture 1: Digits, optional (dot digits)*, optional dot
+          // \s+        One or more whitespace
+          // (.*)       Capture 2: Rest of text
+          //
+          // Note: The previous logic relied on "trimmed match".
+          const match = trimmed.match(/^(\d+(?:\.\d+)*\.?)\s+(.*)$/);
 
-        return formattedLines.join('\n');
+          if (match) {
+            const numbering = match[1];
+            const content = match[2];
+
+            // Calculate level
+            // "1." -> 1
+            // "1.1." -> 2
+            // "1.1.1." -> 3
+            // Split by '.' and filter.
+            // "1." -> ["1", ""] -> len 1
+            // "1.1." -> ["1", "1", ""] -> len 2
+            const level = numbering.split('.').filter(Boolean).length;
+
+            // Indentation rule: (level - 1) * 4 spaces
+            const indentSize = Math.max(0, (level - 1) * 4);
+            const indent = ' '.repeat(indentSize);
+
+            // Reconstruct with EXACTLY one space between numbering and content
+            acc.push(`${indent}${numbering} ${content}`);
+          } else {
+            // Non-numbered lines (headers like "# Dev Spec", or unmatched text)
+            // We return them as is, but trimmed?
+            // If we strict trim, we might lose intentional indentation for code blocks.
+            // But the user requirements are seemingly for the spec list items.
+            // For safety with mixed content (headers), let's just return the line processed?
+            // If I trim everything, headers "# Title" work fine.
+            // Multiline descriptions might break if I trim them.
+            // But valid spec lines usually follow the pattern.
+            // Let's rely on the user's "strict" implication.
+            // If it matches a header start "#", keep it.
+            // If it's just text, maybe keep previous indent?
+            // Simplest safe approach: usage of the original line's indentation for non-matches?
+            // BUT, "no tabs", "no extra spaces" applies globally?
+            // Let's assume non-matching lines should just be trimmed or kept as is but likely the user wants clean file.
+            // Let's keep unmatched lines essentially as-is but rtrim?
+            // Or better: Indent them relative to previous? Too complex.
+            // Fallback: Just return the original line (but maybe replace tabs?).
+            // Wait, I trimmed `line` at the start of loop.
+            // If I use `trimmed` here, I lose indentation for non-spec lines.
+            // Let's recover the original indentation for non-spec lines if possible, or just accept that spec.md is highly structured.
+            // The file seems to be pure headers + list.
+            // If I blindly trim non-list lines, standard headers work (# Header).
+            // Let's stick with `trimmed` for everything to enforce "no extra spaces".
+            acc.push(trimmed);
+          }
+
+          return acc;
+        }, []);
+
+        return formattedLines.join('\n') + '\n'; // Ensure final newline
       },
     },
   },
