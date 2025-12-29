@@ -24,6 +24,8 @@ export type CellType =
 export type PillColor = 'R' | 'Y' | 'B';
 export type Orientation = 'HORIZONTAL' | 'VERTICAL';
 
+import { audioManager } from '../audio/AudioManager';
+
 export interface ActivePill {
   x: number; // Left/Top segment position
   y: number;
@@ -38,13 +40,13 @@ export interface GameState {
   level: number;
   speed: 'LOW' | 'MED' | 'HIGH';
   status:
-    | 'PLAYING'
-    | 'PAUSED'
-    | 'GAME_OVER'
-    | 'VICTORY'
-    | 'FLASHING'
-    | 'CASCADING'
-    | 'WIN_ANIMATION';
+  | 'PLAYING'
+  | 'PAUSED'
+  | 'GAME_OVER'
+  | 'VICTORY'
+  | 'FLASHING'
+  | 'CASCADING'
+  | 'WIN_ANIMATION';
   activePill: ActivePill | null;
   nextPill: { color1: PillColor; color2: PillColor } | null;
   virusCount: number;
@@ -367,6 +369,7 @@ export class DrMarioEngine {
           ];
         }
         // CCW: Left becomes Top, Right becomes Bottom (no swap needed)
+        void audioManager.playSFX('rotation');
       }
     } else {
       // Rotating to HORIZONTAL
@@ -380,6 +383,7 @@ export class DrMarioEngine {
             this._activePill.color1,
           ];
         }
+        void audioManager.playSFX('rotation');
       } else if (x > 0 && this.canPlace(x - 1, y, 'HORIZONTAL')) {
         // Wall kick left
         this._activePill.x = x - 1;
@@ -390,6 +394,7 @@ export class DrMarioEngine {
             this._activePill.color1,
           ];
         }
+        void audioManager.playSFX('rotation');
       }
     }
   }
@@ -427,6 +432,8 @@ export class DrMarioEngine {
 
     this._activePill = null;
     this._pillsDropped++;
+
+    void audioManager.playSFX('thud');
 
     // Check for matches
     this.checkAndClearMatches();
@@ -771,6 +778,8 @@ export class DrMarioEngine {
           this._status = 'CASCADING';
           this._cascadeTimer = 0;
         }
+
+        void audioManager.playSFX('pop');
       }
     } else if (this._status === 'WIN_ANIMATION') {
       this._winAnimTimer += deltaMs;

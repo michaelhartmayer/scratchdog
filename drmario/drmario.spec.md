@@ -15,6 +15,7 @@
         3.1.2. Rotation Details  
             3.1.2.1. Button A (X) rotates the pill 90 degrees clockwise.  
             3.1.2.2. Button B (Z) rotates the pill 90 degrees counter-clockwise.  
+            3.1.2.3. Rotation triggers the sound: /audio/rotation.mp3  
     3.2. Matching  
         3.2.1. Alignment Clear Rules  
             3.2.1.1. Aligning 4 or more color segments (virus or pill) vertically or horizontally eliminates them.  
@@ -40,6 +41,7 @@
         3.4.2. The next upcoming pill is visible to the player.  
     3.5. Locking  
         3.5.1. Pills lock into place when they land on a supported surface and are not moved for a short duration.  
+        3.5.2. Landing triggers the sound: /audio/thud.mp3  
     3.6. Clear Animations  
         3.6.1. When a match is made, matched segments flash for 16 frames (~267ms at 60fps) before being removed.  
         3.6.2. Viruses are replaced with an "X" or starburst explosion sprite when eliminated.  
@@ -48,6 +50,7 @@
         3.6.5. After the clear animation completes, unsupported capsule segments fall at 4 rows/second (250ms per row).  
         3.6.6. Each cascade re-checks for new matches, repeating the clear animation if needed.  
         3.6.7. Chained clears from cascading use the same flash animation (16 frames/267ms) before removal.  
+        3.6.8. When matched segments are removed, play the sound: /audio/pop.mp3  
     3.7. Victory Animation  
         3.7.1. Trigger: Initiated immediately after the final virus is cleared and all resulting cascades have completed.  
         3.7.2. Mechanics:  
