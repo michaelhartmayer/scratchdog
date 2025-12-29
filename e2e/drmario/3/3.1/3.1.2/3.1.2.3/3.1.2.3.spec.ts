@@ -6,9 +6,7 @@ test('3.1.2.3 Rotation triggers the sound', async ({ page }) => {
   await page.click('text=New Game');
 
   // Wait for game to be ready
-  await page.waitForFunction(
-    () => window.getE2EState('DRMARIO_STATE'),
-  );
+  await page.waitForFunction(() => window.getE2EState('DRMARIO_STATE'));
 
   // Rotate pill (X = CW)
   await page.keyboard.press('x');

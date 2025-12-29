@@ -5,9 +5,7 @@ test('3.5.2 Landing triggers the sound', async ({ page }) => {
   await page.click('body');
   await page.click('text=New Game');
 
-  await page.waitForFunction(
-    () => window.getE2EState('DRMARIO_STATE'),
-  );
+  await page.waitForFunction(() => window.getE2EState('DRMARIO_STATE'));
 
   // Hard drop pill to force landing immediately
   await page.keyboard.press('ArrowUp');

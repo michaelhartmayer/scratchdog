@@ -40,13 +40,13 @@ export interface GameState {
   level: number;
   speed: 'LOW' | 'MED' | 'HIGH';
   status:
-  | 'PLAYING'
-  | 'PAUSED'
-  | 'GAME_OVER'
-  | 'VICTORY'
-  | 'FLASHING'
-  | 'CASCADING'
-  | 'WIN_ANIMATION';
+    | 'PLAYING'
+    | 'PAUSED'
+    | 'GAME_OVER'
+    | 'VICTORY'
+    | 'FLASHING'
+    | 'CASCADING'
+    | 'WIN_ANIMATION';
   activePill: ActivePill | null;
   nextPill: { color1: PillColor; color2: PillColor } | null;
   virusCount: number;
