@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 interface E2EAudioState {
-  playMusic: (name: string, loop: boolean) => void;
+  playMusic: (name: string, loop: boolean) => Promise<void>;
   fadeOutMusic: (duration: number) => void;
   currentMusic: {
     volume: number;
@@ -20,9 +20,9 @@ test('6.3.2 Smooth fading in and out of music tracks', async ({ page }) => {
   );
 
   // Start music
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const audio = window.getE2EState('AUDIO_MANAGER') as E2EAudioState;
-    audio.playMusic('bgm_test', true);
+    await audio.playMusic('bgm_test', true);
   });
 
   // Start fade out (e.g., 500ms)

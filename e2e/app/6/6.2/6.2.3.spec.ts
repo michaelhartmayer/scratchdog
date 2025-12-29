@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 interface E2EAudioState {
-  playSFX: (name: string) => void;
+  playSFX: (name: string) => Promise<void>;
   getLastPlayTime: (name: string) => number;
 }
 
@@ -19,10 +19,9 @@ test('6.2.3 Low-latency triggering for game-critical feedback', async ({
   );
 
   const startTime = Date.now();
-  await page.evaluate(() => {
-    (window.getE2EState('AUDIO_MANAGER') as E2EAudioState).playSFX(
-      'critical_hit',
-    );
+  await page.evaluate(async () => {
+    const audio = window.getE2EState('AUDIO_MANAGER') as E2EAudioState;
+    await audio.playSFX('critical_hit');
   });
 
   const processedTime = await page.evaluate(() => {

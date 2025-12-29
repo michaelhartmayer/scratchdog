@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 interface E2EAudioState {
-  playMusic: (name: string, loop: boolean) => void;
+  playMusic: (name: string, loop: boolean) => Promise<void>;
   currentMusic: {
     isPlaying: boolean;
   } | null;
@@ -26,9 +26,9 @@ test('6.3.4 Automatic pausing and resuming of music when the game is paused or r
   await page.waitForSelector('[data-testid="game-screen"]');
 
   // Start music
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const audio = window.getE2EState('AUDIO_MANAGER') as E2EAudioState;
-    audio.playMusic('bgm_gameplay', true);
+    await audio.playMusic('bgm_gameplay', true);
   });
 
   // Ensure game has focus and is running

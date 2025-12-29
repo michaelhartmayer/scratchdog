@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 interface E2EAudioState {
-  playMusic: (name: string, loop: boolean) => void;
+  playMusic: (name: string, loop: boolean) => Promise<void>;
   currentMusic: {
     name: string;
     loop: boolean;
@@ -23,9 +23,9 @@ test('6.3.1 Background music playback with looping support', async ({
   );
 
   // Start music with looping
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const audio = window.getE2EState('AUDIO_MANAGER') as E2EAudioState;
-    audio.playMusic('bgm_chill', true);
+    await audio.playMusic('bgm_chill', true);
   });
 
   // Verify internal state reflects looping

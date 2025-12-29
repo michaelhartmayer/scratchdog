@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 interface E2EAudioState {
-  playMusic: (name: string, loop: boolean) => void;
-  crossfadeTo: (name: string, duration: number) => void;
+  playMusic: (name: string, loop: boolean) => Promise<void>;
+  crossfadeTo: (name: string, duration: number) => Promise<void>;
   currentMusic: {
     name: string;
     isPlaying: boolean;
@@ -23,17 +23,15 @@ test('6.3.3 Seamless transitions between different music tracks (Crossfading)', 
   );
 
   // Start Track A
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const audio = window.getE2EState('AUDIO_MANAGER') as E2EAudioState;
-    audio.playMusic('track_a', true);
+    await audio.playMusic('track_a', true);
   });
 
   // Crossfade to Track B
-  await page.evaluate(() => {
-    (window.getE2EState('AUDIO_MANAGER') as E2EAudioState).crossfadeTo(
-      'track_b',
-      500,
-    );
+  await page.evaluate(async () => {
+    const audio = window.getE2EState('AUDIO_MANAGER') as E2EAudioState;
+    await audio.crossfadeTo('track_b', 500);
   });
 
   // Wait for crossfade duration + buffer

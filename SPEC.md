@@ -55,9 +55,10 @@
             * 2.4.7.1. Has a "Back" button    
             * 2.4.7.2. Has an "Apply" button    
     * 2.5. Main Menu Music    
-        * 2.5.1. Plays the main menu song, which is /audio/falling-falling-falling.mp3    
+        * 2.5.1. Plays the main menu song, which is /audio/intro.mp3    
         * 2.5.2. Music fades in over 1 second    
         * 2.5.3. When Play is pressed the song fades out over 1 second    
+        * 2.5.4. Audio assets are only requested once from the network    
 * 3. Game Screen    
     * 3.1. The screen fades in from black    
     * 3.2. The HUD is displayed    
@@ -107,6 +108,8 @@
     * 6.4. Resource Management    
         * 6.4.1. Preloading of audio assets to avoid playback delays    
         * 6.4.2. Proper disposal of audio instances to prevent memory leaks    
+    * 6.5 Error Handling    
+        * 6.5.1. Errors are detected and logged so they can be picked up in e2e testing    
 
 
 

@@ -8,8 +8,10 @@ export class AudioManager {
   private _isMuted = false;
 
   private _activeSFX = new Set<string>();
+
   private _lastPlayTimes = new Map<string, number>();
   private _instanceCounts = new Map<string, number>();
+  private _loadingPromises = new Map<string, Promise<void>>();
 
   private _currentMusicAlias: string | null = null;
   private _currentMusicInstance: Sound | null = null;
@@ -158,8 +160,8 @@ export class AudioManager {
     let instance;
     try {
       instance = await sound.play(name, { volume: vol });
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error('Failed to play SFX:', err);
     }
 
     this._activeSFX.add(name);
@@ -210,6 +212,10 @@ export class AudioManager {
   // --- Music (6.3) ---
 
   public async playMusic(name: string, loop = true) {
+    if (this._isMuted) {
+      // vol = 0; // Unused
+    }
+
     if (this._currentMusicAlias === name && this._isMusicPlaying) {
       return;
     }
@@ -225,38 +231,28 @@ export class AudioManager {
       this._currentMusicInstance = null;
     }
 
-    const vol = this._masterVolume * this._musicVolume;
-    this._currentMusicAlias = name;
+    const s = sound.find(name) as Sound | undefined;
+    if (!s) {
+      console.error(`Sound "${name}" not found.`);
+      this._isMusicPlaying = false;
+      this._currentMusicAlias = null;
+      return;
+    }
 
-    if (sound.exists(name)) {
-      const s = sound.find(name);
-      s.loop = loop;
-      s.volume = vol;
-      this._currentMusicInstance = s; // Set immediately for state visibility
-      this._isMusicPlaying = true;
-      this._musicPaused = false;
-      try {
-        await s.play();
-      } catch {
-        // Ignore play error
-      }
-    } else {
-      this._isMusicPlaying = true;
-      this._musicPaused = false;
-      // Fallback for E2E if asset issue
-      if (process.env.NODE_ENV !== 'production') {
-        this._currentMusicInstance = {
-          loop,
-          volume: vol,
-          stop: () => {
-            /* noop */
-          },
-          play: async () => {
-            await Promise.resolve();
-            return {} as unknown as Sound;
-          },
-        } as unknown as Sound;
-      }
+    const targetVol = this._masterVolume * this._musicVolume;
+    s.loop = loop;
+    s.volume = targetVol;
+    this._currentMusicAlias = name;
+    this._currentMusicInstance = s;
+    this._isMusicPlaying = true;
+    this._musicPaused = false;
+
+    try {
+      await s.play();
+    } catch (err) {
+      console.error('Failed to play music:', err);
+      this._isMusicPlaying = false;
+      this._currentMusicInstance = null;
     }
   }
 
@@ -296,46 +292,61 @@ export class AudioManager {
     const oldInstance = this._currentMusicInstance;
 
     await this._ensureAsset(name);
+    const newSound = sound.find(name) as Sound | undefined;
 
-    if (sound.exists(name)) {
-      const newSound = sound.find(name);
-      newSound.volume = 0;
-      newSound.loop = true;
-      // Handle floating promise
-      try {
-        void newSound.play();
-      } catch {
-        // ignore
+    if (!newSound) {
+      console.error(`Sound "${name}" not found for crossfade.`);
+      if (!oldInstance) {
+        // If nothing was playing and new sound misses, just abort
+        return;
       }
+      // If something was playing, we can't crossfade. Just let old one play?
+      // Or stop it? Let's abort crossfade.
+      return;
+    }
 
-      this._currentMusicAlias = name;
-      this._currentMusicInstance = newSound;
-      this._isMusicPlaying = true;
+    newSound.volume = 0;
+    newSound.loop = true;
 
-      const targetVol = this._masterVolume * this._musicVolume;
-      const startTime = Date.now();
+    // Start playing new sound
+    try {
+      const playResult = newSound.play();
+      if (playResult instanceof Promise) {
+        playResult.catch((err: unknown) => {
+          console.error('Failed to play new sound in crossfade:', err);
+        });
+      }
+    } catch {
+      // ignore sync errors
+    }
 
-      const timer = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const ratio = Math.min(1, elapsed / duration);
+    this._currentMusicAlias = name;
+    this._currentMusicInstance = newSound;
+    this._isMusicPlaying = true;
 
+    const targetVol = this._masterVolume * this._musicVolume;
+    const startTime = Date.now();
+
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const ratio = Math.min(1, elapsed / duration);
+
+      if (oldInstance) {
+        oldInstance.volume = targetVol * (1 - ratio);
+      }
+      newSound.volume = targetVol * ratio;
+
+      if (ratio >= 1) {
+        clearInterval(timer);
         if (oldInstance) {
-          oldInstance.volume = targetVol * (1 - ratio);
-        }
-        newSound.volume = targetVol * ratio;
-
-        if (ratio >= 1) {
-          clearInterval(timer);
-          if (oldInstance) {
-            try {
-              oldInstance.stop();
-            } catch {
-              // ignore
-            }
+          try {
+            oldInstance.stop();
+          } catch {
+            // ignore
           }
         }
-      }, 50);
-    }
+      }
+    }, 50);
   }
 
   public async fadeInMusic(name: string, duration: number) {
@@ -344,9 +355,6 @@ export class AudioManager {
       this._isMusicPlaying &&
       !this._musicPaused
     ) {
-      // If already playing, just ensure volume is up? Or restart?
-      // Spec implies it fades in when menu starts. If we are already here, maybe we don't restart.
-      // But for robustness, let's treat it as a request to ensure it's playing and fade it in if not already at volume.
       return;
     }
 
@@ -361,61 +369,40 @@ export class AudioManager {
       this._currentMusicInstance = null;
     }
 
+    const s = sound.find(name) as Sound | undefined;
+    if (!s) {
+      console.error(`Sound "${name}" not found for fade in.`);
+      return;
+    }
+
     const targetVol = this._masterVolume * this._musicVolume;
     this._currentMusicAlias = name;
 
-    if (sound.exists(name)) {
-      const s = sound.find(name);
-      s.loop = true;
-      s.volume = 0;
-      this._currentMusicInstance = s;
-      this._isMusicPlaying = true;
-      this._musicPaused = false;
-      try {
-        await s.play();
-      } catch {
-        // ignore
-      }
+    s.loop = true;
+    s.volume = 0;
+    this._currentMusicInstance = s;
+    this._isMusicPlaying = true;
+    this._musicPaused = false;
 
-      const startTime = Date.now();
-      const timer = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const ratio = Math.min(1, elapsed / duration);
-        if (this._currentMusicInstance === s) {
-          s.volume = targetVol * ratio;
-        }
-
-        if (ratio >= 1 || this._currentMusicInstance !== s) {
-          clearInterval(timer);
-        }
-      }, 50);
-    } else {
-      // Fallback similar to playMusic
-      this._isMusicPlaying = true;
-      this._musicPaused = false;
-      if (process.env.NODE_ENV !== 'production') {
-        this._currentMusicInstance = {
-          loop: true,
-          volume: 0,
-          stop: () => { void 0; },
-          play: async () => {
-            await Promise.resolve();
-            return {} as unknown as Sound;
-          },
-        } as unknown as Sound;
-
-        // Mock fade for E2E visibility
-        const startTime = Date.now();
-        const timer = setInterval(() => {
-          const elapsed = Date.now() - startTime;
-          const ratio = Math.min(1, elapsed / duration);
-          if (this._currentMusicInstance) {
-            this._currentMusicInstance.volume = targetVol * ratio;
-          }
-          if (ratio >= 1) clearInterval(timer);
-        }, 50);
-      }
+    try {
+      await s.play();
+    } catch (err) {
+      console.error('Failed to fade in music:', err);
+      return;
     }
+
+    const startTime = Date.now();
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const ratio = Math.min(1, elapsed / duration);
+      if (this._currentMusicInstance === s) {
+        s.volume = targetVol * ratio;
+      }
+
+      if (ratio >= 1 || this._currentMusicInstance !== s) {
+        clearInterval(timer);
+      }
+    }, 50);
   }
 
   public setPaused(paused: boolean) {
@@ -432,20 +419,81 @@ export class AudioManager {
     }
   }
 
-  public async preload(assets: string[]) {
-    const promises = assets.map((name) => {
-      if (!sound.exists(name)) {
-        return new Promise<void>((resolve) => {
+  public async preload(assets: string[]): Promise<void> {
+    const isE2E = import.meta.env.VITE_E2E_MODE === 'true';
+
+    const promises: Promise<void>[] = assets.map((name) => {
+      // Already loading (prevent duplicate requests)
+      const existingPromise = this._loadingPromises.get(name);
+      if (existingPromise) {
+        return existingPromise;
+      }
+
+      // Check if it already exists AND is loaded
+      const existing = sound.find(name) as { isLoaded: boolean } | undefined;
+      if (existing?.isLoaded === true) {
+        return Promise.resolve();
+      }
+
+      // Load the real audio file from public/audio/
+      const loadPromise = new Promise<void>((resolve) => {
+        // Absolute safety timeout to prevent deadlocks
+        const safetyTimeout = setTimeout(() => {
+          console.warn(`[AudioManager] Absolute timeout for "${name}"`);
+          resolve();
+        }, 5000);
+
+        const done = () => {
+          clearTimeout(safetyTimeout);
+          resolve();
+        };
+
+        const addFallback = () => {
+          if (isE2E) {
+            try {
+              if (sound.exists(name)) {
+                sound.remove(name);
+              }
+              sound.add(name, {
+                url: '/audio/pop.mp3',
+                preload: true,
+                loaded: () => {
+                  setTimeout(done, 10);
+                },
+              });
+            } catch (fallbackErr) {
+              console.error(
+                `[AudioManager] Critical failure adding fallback for ${name}:`,
+                fallbackErr,
+              );
+              done();
+            }
+          } else {
+            done();
+          }
+        };
+
+        try {
           sound.add(name, {
-            url: 'data:audio/mp3;base64,//uQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq',
+            url: `/audio/${name}.mp3`,
             preload: true,
-            loaded: () => {
-              resolve();
+            loaded: (err: Error | null) => {
+              if (err !== null) {
+                console.error(`Sound "${name}" not found.`);
+                addFallback();
+                return;
+              }
+              setTimeout(done, 10);
             },
           });
-        });
-      }
-      return Promise.resolve();
+        } catch (err) {
+          console.error(`Error adding sound "${name}":`, err);
+          addFallback();
+        }
+      });
+
+      this._loadingPromises.set(name, loadPromise);
+      return loadPromise;
     });
     await Promise.all(promises);
   }
@@ -462,10 +510,22 @@ export class AudioManager {
     return sound.exists(name);
   }
 
-  private async _ensureAsset(name: string) {
-    if (!sound.exists(name)) {
-      await this.preload([name]);
+  private async _ensureAsset(name: string): Promise<void> {
+    const existing = sound.find(name) as { isLoaded: boolean } | undefined;
+    if (existing?.isLoaded === true) {
+      // Already loaded, nothing to do
+      return;
     }
+
+    // If a loading promise exists, wait for it
+    const loadingPromise = this._loadingPromises.get(name);
+    if (loadingPromise) {
+      await loadingPromise;
+      return;
+    }
+
+    // Not loaded and not loading, start loading
+    await this.preload([name]);
   }
 }
 

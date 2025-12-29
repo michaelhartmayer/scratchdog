@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 interface E2EAudioState {
-  playSFX: (name: string) => void;
+  playSFX: (name: string) => Promise<void>;
   getActiveInstances: (name: string) => number;
 }
 
@@ -19,11 +19,11 @@ test('6.2.2 Support for many instances of the same sound at once', async ({
   );
 
   // Trigger same sound multiple times
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const audio = window.getE2EState('AUDIO_MANAGER') as E2EAudioState;
-    audio.playSFX('rapid_fire');
-    audio.playSFX('rapid_fire');
-    audio.playSFX('rapid_fire');
+    await audio.playSFX('rapid_fire');
+    await audio.playSFX('rapid_fire');
+    await audio.playSFX('rapid_fire');
   });
 
   // Verify multiple instances are active

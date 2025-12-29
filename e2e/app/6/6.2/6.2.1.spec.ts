@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 interface E2EAudioState {
-  playSFX: (name: string) => void;
+  playSFX: (name: string) => Promise<void>;
   activeSounds: string[]; // List of currently playing sound IDs or names
 }
 
@@ -17,12 +17,12 @@ test('6.2.1 Ability to play multiple SFX simultaneously', async ({ page }) => {
   );
 
   // Trigger multiple sounds quickly
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const audio = window.getE2EState('AUDIO_MANAGER') as E2EAudioState;
     // Assuming 'pop' is a valid sound name from previous context
-    audio.playSFX('pop');
-    audio.playSFX('pop');
-    audio.playSFX('active_chill'); // Just a hypothetical name or reuse pop
+    await audio.playSFX('pop');
+    await audio.playSFX('pop');
+    await audio.playSFX('active_chill'); // Just a hypothetical name or reuse pop
   });
 
   // Verify that multiple sounds are tracked as active
