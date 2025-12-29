@@ -71,5 +71,4 @@ npm run test:e2e
 
 ## Specifications
 This project strictly follows detailed specifications located in the `specifications/` and `drmario/` directories:
-*   [App Spec](specifications/app.spec.md): UI, Menus, Audio, and Theme details.
-*   [Dr. Mario Spec](drmario/drmario.spec.md): Deep dive into game logic, frame data, and algorithms.
+*   [Full Specification](SPEC.md): A comprehensive document covering UI, Menus, Audio, Theme, and Game Mechanics.
