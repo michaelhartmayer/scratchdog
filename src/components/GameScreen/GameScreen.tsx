@@ -1,10 +1,11 @@
 import { useRef, useState, useCallback } from 'react';
-import { Application, Text, Container } from 'pixi.js';
+import { Application, Text as PixiText, Container } from 'pixi.js';
 import { PauseMenu } from '../PauseMenu';
+import { Text } from '../DesignSystem/Text';
 import { useGameScreen } from '../../hooks/useGameScreen';
 import { usePixiApp } from '../../hooks/usePixiApp';
 import { useKeyboardInput } from '../../hooks/useKeyboardInput';
-import { DrMarioEngine, CellType } from '../../game/DrMarioEngine';
+import { DrMarioEngine, CellType, PillColor } from '../../game/DrMarioEngine';
 import { exposeE2EState } from '../../utils/env-utils';
 import './GameScreen.css';
 
@@ -38,6 +39,7 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
   const [paused, setPaused] = useState(false);
   const [score, setScore] = useState(0);
   const [virusCount, setVirusCount] = useState(0);
+  const [nextPill, setNextPill] = useState<{ color1: PillColor; color2: PillColor } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<DrMarioEngine>(new DrMarioEngine());
 
@@ -83,6 +85,7 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
       engineRef.current.initializeLevel(0, 'LOW');
       setScore(engineRef.current.state.score);
       setVirusCount(engineRef.current.state.virusCount);
+      setNextPill(engineRef.current.state.nextPill);
 
       // Container for game elements
       const gameContainer = new Container();
@@ -92,56 +95,51 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
       const pillContainer = new Container();
       app.stage.addChild(pillContainer);
 
+      const CELL_SIZE = 32;
+
       // Text Sprites Cache for grid
-      const sprites: (Text | null)[][] = Array.from(
+      const sprites: (PixiText | null)[][] = Array.from(
         { length: 16 },
-        (): (Text | null)[] =>
-          Array.from({ length: 8 }, (): Text | null => null),
+        (): (PixiText | null)[] =>
+          Array.from({ length: 8 }, (): PixiText | null => null),
       );
 
-      // Active pill sprites
-      let pillSprite1: Text | null = null;
-      let pillSprite2: Text | null = null;
+      let pillSprite1: PixiText | null = null;
+      let pillSprite2: PixiText | null = null;
 
-      const CELL_SIZE = 32;
-      let lastTime = performance.now();
-
-      // Game Loop
       app.ticker.add(() => {
-        const now = performance.now();
-        const deltaMs = now - lastTime;
-        lastTime = now;
-
         if (!paused) {
+          const deltaMs = app.ticker.deltaMS;
           engineRef.current.tick(deltaMs);
 
           const state = engineRef.current.state;
-
-          // Expose state for E2E testing (Spec 7.1)
+          setScore(state.score);
+          setVirusCount(state.virusCount);
+          setNextPill(state.nextPill);
           exposeE2EState('DRMARIO_STATE', state);
           exposeE2EState('DRMARIO_ENGINE', engineRef.current);
 
-          // Update React state for HUD
-          setScore(state.score);
-          setVirusCount(state.virusCount);
-
-          // Handle game over
           if (state.status === 'GAME_OVER' && onGameOver) {
             onGameOver();
           }
 
-          // Render Grid
-          const grid = state.grid;
-          grid.forEach((row, y) => {
+          // Update Grid Sprites
+          state.grid.forEach((row, y) => {
             row.forEach((cell, x) => {
-              const existingSprite = sprites[y][x];
               const emoji = CELL_EMOJI[cell];
+              const existingSprite = sprites[y][x];
 
-              if (cell === 'EMPTY' && existingSprite) {
-                gameContainer.removeChild(existingSprite);
-                sprites[y][x] = null;
-              } else if (cell !== 'EMPTY' && !existingSprite) {
-                const text = new Text({
+              if (!emoji) {
+                if (existingSprite) {
+                  gameContainer.removeChild(existingSprite);
+                  sprites[y][x] = null;
+                }
+                return;
+              }
+
+              // Create or update text sprite
+              if (!existingSprite) {
+                const text = new PixiText({
                   text: emoji,
                   style: { fontSize: CELL_SIZE - 4 },
                 });
@@ -149,7 +147,7 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
                 text.y = y * CELL_SIZE;
                 gameContainer.addChild(text);
                 sprites[y][x] = text;
-              } else if (existingSprite && existingSprite.text !== emoji) {
+              } else if (existingSprite.text !== emoji) {
                 existingSprite.text = emoji;
               }
             });
@@ -160,14 +158,14 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
           if (pill) {
             // Create or update pill sprites
             if (!pillSprite1) {
-              pillSprite1 = new Text({
+              pillSprite1 = new PixiText({
                 text: '',
                 style: { fontSize: CELL_SIZE - 4 },
               });
               pillContainer.addChild(pillSprite1);
             }
             if (!pillSprite2) {
-              pillSprite2 = new Text({
+              pillSprite2 = new PixiText({
                 text: '',
                 style: { fontSize: CELL_SIZE - 4 },
               });
@@ -207,24 +205,56 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
           color: 'white',
           display: 'flex',
           justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+          maxWidth: '400px',
+          marginBottom: '20px',
           padding: '10px 20px',
         }}
       >
-        <div>SCORE: {score}</div>
-        <div>VIRUSES: {virusCount}</div>
+        <div className="glass-panel" style={{ padding: '10px 15px' }}>
+          <div style={{ marginBottom: '4px' }}>
+            <Text variant="overline">SCORE</Text>
+          </div>
+          <Text variant="heading">{score}</Text>
+        </div>
+
+        <div className="glass-panel" style={{ padding: '10px 15px', textAlign: 'right' }}>
+          <div style={{ marginBottom: '4px' }}>
+            <Text variant="overline">NEXT</Text>
+          </div>
+          <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
+            {nextPill ? (
+              <>
+                <div className={`pill-segment ${nextPill.color1.toLowerCase()}`} style={{ width: '24px', height: '24px', borderRadius: '50%' }} />
+                <div className={`pill-segment ${nextPill.color2.toLowerCase()}`} style={{ width: '24px', height: '24px', borderRadius: '50%' }} />
+              </>
+            ) : (
+              <div style={{ width: '52px', height: '24px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }} />
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* PixiJS Container */}
-      <div
-        ref={containerRef}
-        className="game-center"
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100%',
-        }}
-      />
+      <div id="pill-bottle">
+        <div id="bottle-neck" />
+        {/* PixiJS Container */}
+        <div
+          ref={containerRef}
+          className="game-center"
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: '12px',
+            overflow: 'hidden',
+          }}
+        />
+      </div>
+
+      <div style={{ marginTop: '20px', opacity: 0.6 }}>
+        <Text variant="caption">VIRUSES: {virusCount}</Text>
+      </div>
 
       {paused && (
         <PauseMenu

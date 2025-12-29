@@ -67,5 +67,21 @@
         6.3.1. Virus Count = 4 * (Level + 1).  
         6.3.2. Maximum virus count is capped at 84 (Level 20+).  
 7. Technical Details  
-    7.1. There should only be one game canvas on screen at a given time.  
-
+    7.1. There should only be one game canvas on screen at a given time. 
+8. UI  
+    8.1. Pill Bottle  
+        8.1.1. The play area is contained within a medicine bottle shape.  
+        8.1.2. The bottle has a narrow neck opening at the top where pills enter.  
+        8.1.3. The bottle is translucent with a slight glass-like appearance.  
+    8.2. Colors  
+        8.2.1. Red: A vibrant cherry red (#FF0000 or similar).  
+        8.2.2. Yellow: A bright golden yellow (#FFFF00 or similar).  
+        8.2.3. Blue: A deep royal blue (#0000FF or similar).  
+    8.3. Viruses  
+        8.3.1. Viruses are small animated creatures with distinct faces.  
+        8.3.2. Each color virus has a unique appearance/expression.  
+        8.3.3. Viruses wiggle or animate slightly when idle.  
+    8.4. Pills  
+        8.4.1. Pills are capsule-shaped with two colored halves.  
+        8.4.2. Each half is a solid color (R/Y/B).  
+        8.4.3. Pills have a slight 3D shading/highlight effect.  

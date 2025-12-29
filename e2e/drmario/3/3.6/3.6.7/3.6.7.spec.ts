@@ -34,6 +34,7 @@ test('3.6.7 Chained clears use same flash animation as initial clears', async ({
   grid[15][0] = virusType;
   grid[15][1] = virusType;
   grid[15][2] = virusType;
+  grid[15][3] = virusType;
   grid[10][7] = 'VIRUS_B'; // Extra to prevent VICTORY
 
   await page.evaluate((g) => {
@@ -43,7 +44,9 @@ test('3.6.7 Chained clears use same flash animation as initial clears', async ({
     engine.setGrid(g);
   }, grid);
 
-  // Hard drop to trigger match
+  // Move pill to the right and hard drop to trigger match
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
   await page.keyboard.press(' ');
 
   // Should enter FLASHING state for initial match
@@ -57,7 +60,8 @@ test('3.6.7 Chained clears use same flash animation as initial clears', async ({
   const hasExplosion =
     state.grid[15][0].startsWith('EXPLODE') ||
     state.grid[15][1].startsWith('EXPLODE') ||
-    state.grid[15][2].startsWith('EXPLODE');
+    state.grid[15][2].startsWith('EXPLODE') ||
+    state.grid[15][3].startsWith('EXPLODE');
   expect(hasExplosion).toBe(true);
 
   // Wait for flash + cascade to complete
@@ -71,6 +75,7 @@ test('3.6.7 Chained clears use same flash animation as initial clears', async ({
   expect(state.grid[15][0]).toBe('EMPTY');
   expect(state.grid[15][1]).toBe('EMPTY');
   expect(state.grid[15][2]).toBe('EMPTY');
+  expect(state.grid[15][3]).toBe('EMPTY');
 
   // Game should be back to PLAYING
   expect(state.status).toBe('PLAYING');
