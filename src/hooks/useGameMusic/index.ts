@@ -1,12 +1,11 @@
 import { useEffect, useCallback } from 'react';
 import { audioManager } from '../../audio/AudioManager';
 
-export const useMainMenuMusic = () => {
+export const useGameMusic = () => {
   useEffect(() => {
-    void audioManager.fadeInMusic('intro', 1000);
+    void audioManager.fadeInMusic('falling-falling-falling', 1000);
     return () => {
-      // If we unmount rapidly, we should probably stop or let it be.
-      // For now, let's just ensure we don't have multiple copies (fadeIn handles this though)
+      // Optional cleanup - usually handled by explicit fadeOutAndExecute
     };
   }, []);
 

@@ -111,6 +111,8 @@ export class AudioManager {
       isMuted: this._isMuted,
       activeSounds: Array.from(this._activeSFX),
       currentMusic: this.get_currentMusic(),
+      isMusicPaused: this._musicPaused,
+      isContextPaused: sound.context.paused,
     };
   }
 
@@ -407,13 +409,21 @@ export class AudioManager {
 
   public setPaused(paused: boolean) {
     if (paused) {
-      if (this._isMusicPlaying && !this._musicPaused) {
-        sound.pauseAll();
+      if (
+        this._currentMusicInstance &&
+        this._isMusicPlaying &&
+        !this._musicPaused
+      ) {
+        this._currentMusicInstance.pause();
         this._musicPaused = true;
       }
     } else {
-      if (this._isMusicPlaying && this._musicPaused) {
-        sound.resumeAll();
+      if (
+        this._currentMusicInstance &&
+        this._isMusicPlaying &&
+        this._musicPaused
+      ) {
+        this._currentMusicInstance.resume();
         this._musicPaused = false;
       }
     }
@@ -430,7 +440,9 @@ export class AudioManager {
       }
 
       // Check if it already exists AND is loaded
-      const existing = sound.find(name) as { isLoaded: boolean } | undefined;
+      const existing = sound.exists(name)
+        ? (sound.find(name) as { isLoaded: boolean } | undefined)
+        : undefined;
       if (existing?.isLoaded === true) {
         return Promise.resolve();
       }
@@ -511,7 +523,9 @@ export class AudioManager {
   }
 
   private async _ensureAsset(name: string): Promise<void> {
-    const existing = sound.find(name) as { isLoaded: boolean } | undefined;
+    const existing = sound.exists(name)
+      ? (sound.find(name) as { isLoaded: boolean } | undefined)
+      : undefined;
     if (existing?.isLoaded === true) {
       // Already loaded, nothing to do
       return;

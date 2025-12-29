@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { audioManager } from '../../audio/AudioManager';
 
 export const useGameOverScreen = (
   setPhase: (phase: number) => void,
@@ -30,6 +31,10 @@ export const useGameOverScreen = (
       clearTimeout(t4);
     };
   }, [setPhase, onMainMenu]);
+
+  useEffect(() => {
+    void audioManager.playSFX('gameover');
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = () => {

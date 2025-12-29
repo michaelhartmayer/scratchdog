@@ -3,6 +3,7 @@ import { Application, Text as PixiText, Container } from 'pixi.js';
 import { PauseMenu } from '../PauseMenu';
 import { Text } from '../DesignSystem/Text';
 import { useGameScreen } from '../../hooks/useGameScreen';
+import { useGameMusic } from '../../hooks/useGameMusic';
 import { usePixiApp } from '../../hooks/usePixiApp';
 import { useKeyboardInput } from '../../hooks/useKeyboardInput';
 import { DrMarioEngine, CellType, PillColor } from '../../game/DrMarioEngine';
@@ -59,6 +60,17 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
   const engineRef = useRef<DrMarioEngine>(new DrMarioEngine());
 
   useGameScreen(paused, setPaused);
+  const { fadeOutAndExecute } = useGameMusic();
+
+  const handleMainMenu = () => {
+    fadeOutAndExecute(onMainMenu);
+  };
+
+  const handleGameOver = useCallback(() => {
+    if (onGameOver) {
+      fadeOutAndExecute(onGameOver);
+    }
+  }, [onGameOver, fadeOutAndExecute]);
 
   // Keyboard input handler
   const handleKeyDown = useCallback(
@@ -135,7 +147,7 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
           exposeE2EState('DRMARIO_ENGINE', engineRef.current);
 
           if (state.status === 'GAME_OVER' && onGameOver) {
-            onGameOver();
+            handleGameOver();
           }
 
           // Update Grid Sprites
@@ -207,7 +219,7 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
         }
       });
     },
-    [onGameOver, paused],
+    [onGameOver, handleGameOver, paused],
   );
 
   usePixiApp({ containerRef, onInit: onInitPixi });
@@ -302,7 +314,7 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
           onSave={() => {
             console.log('Saved');
           }}
-          onMainMenu={onMainMenu}
+          onMainMenu={handleMainMenu}
         />
       )}
     </div>

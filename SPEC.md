@@ -59,6 +59,9 @@
         * 2.5.2. Music fades in over 1 second    
         * 2.5.3. When Play is pressed the song fades out over 1 second    
         * 2.5.4. Audio assets are only requested once from the network    
+    * 2.6. Menu Audio    
+        * 2.6.1. Click sound: /audio/menu-select.mp3    
+        * 2.6.2. Hover sound: /audio/menu-switch.mp3    
 * 3. Game Screen    
     * 3.1. The screen fades in from black    
     * 3.2. The HUD is displayed    
@@ -69,8 +72,14 @@
             * 3.4.2.1. Has a "Resume" button    
             * 3.4.2.2. Has a "Save Game" button    
             * 3.4.2.3. Has a "Main Menu" button    
+        * 3.4.3 Plays pause sound: /audio/pause.mp3    
+    * 3.5. Game Music    
+        * 3.5.1. Plays the game music: /audio/falling-falling-falling.mp3    
+        * 3.5.2. Music fades in over 1 second when the game starts    
+        * 3.5.3. Music fades out over 1 second when the game ends    
 * 4. Game Over Screen    
     * 4.1. The screen fades to black for 2 seconds    
+        * 4.1.1. Plays the game over sound: /audio/gameover.mp3    
     * 4.2. The screen displays the words "Game Over" for 2 seconds    
     * 4.3. The screen fades to black for 2 seconds    
     * 4.4. After the fade out, return to the main menu    
