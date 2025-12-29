@@ -86,6 +86,23 @@
         * 5.2.2. The theme is designed for mobile    
         * 5.2.3. The theme is designed for tablet    
     * 5.3. The documentation is maintained in /docs/theme.md    
+* 6. Audio Manager    
+    * 6.1. Mixing and Volume Control    
+        * 6.1.1. Independent volume sliders for Master, Music, and SFX channels    
+        * 6.1.2. Global mute toggle that preserves individual volume levels when unmuted    
+        * 6.1.3. Real-time volume adjustments during playback    
+    * 6.2. Sound Effects (SFX)    
+        * 6.2.1. Ability to play multiple SFX simultaneously    
+        * 6.2.2. Support for many instances of the same sound at once without interruption (e.g., rapid pill movement)    
+        * 6.2.3. Low-latency triggering for game-critical feedback    
+    * 6.3. Music Management    
+        * 6.3.1. Background music playback with looping support    
+        * 6.3.2. Smooth fading in and out of music tracks    
+        * 6.3.3. Seamless transitions between different music tracks (Crossfading)    
+        * 6.3.4. Automatic pausing and resuming of music when the game is paused or resumed    
+    * 6.4. Resource Management    
+        * 6.4.1. Preloading of audio assets to avoid playback delays    
+        * 6.4.2. Proper disposal of audio instances to prevent memory leaks    
 
 
 
@@ -269,6 +286,7 @@
 
 * 3. Vite    
 * 4. PixiJS    
+    * 4.1. @pixi/sound for Audio Management    
 * 5. React    
 * 6. Vitest    
 * 7. Playwright    

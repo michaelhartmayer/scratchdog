@@ -58,7 +58,7 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<DrMarioEngine>(new DrMarioEngine());
 
-  useGameScreen(setPaused);
+  useGameScreen(paused, setPaused);
 
   // Keyboard input handler
   const handleKeyDown = useCallback(

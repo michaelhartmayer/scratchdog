@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouting } from './hooks/useRouting';
-
+import './audio/AudioManager'; // Initialize AudioManager
 import { SplashScreen } from './components/SplashScreen';
 import { MainMenu } from './components/MainMenu';
 import { GameScreen } from './components/GameScreen';

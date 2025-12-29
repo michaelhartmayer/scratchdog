@@ -1,6 +1,11 @@
 import { useEffect } from 'react';
 
-export const useGameScreen = (setPaused: (paused: boolean) => void) => {
+import { audioManager } from '../../audio/AudioManager';
+
+export const useGameScreen = (
+  paused: boolean,
+  setPaused: (paused: boolean) => void,
+) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -12,4 +17,9 @@ export const useGameScreen = (setPaused: (paused: boolean) => void) => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [setPaused]);
+
+  // Audio pause sync
+  useEffect(() => {
+    audioManager.setPaused(paused);
+  }, [paused]);
 };

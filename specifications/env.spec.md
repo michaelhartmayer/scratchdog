@@ -84,6 +84,7 @@
 
 3. Vite  
 4. PixiJS  
+    4.1. @pixi/sound for Audio Management  
 5. React  
 6. Vitest  
 7. Playwright  
