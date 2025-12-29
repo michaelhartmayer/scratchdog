@@ -25,7 +25,13 @@ export interface GameState {
   score: number;
   level: number;
   speed: 'LOW' | 'MED' | 'HIGH';
-  status: 'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'VICTORY' | 'FLASHING' | 'CASCADING';
+  status:
+    | 'PLAYING'
+    | 'PAUSED'
+    | 'GAME_OVER'
+    | 'VICTORY'
+    | 'FLASHING'
+    | 'CASCADING';
   activePill: ActivePill | null;
   nextPill: { color1: PillColor; color2: PillColor } | null;
   virusCount: number;
@@ -57,7 +63,7 @@ export class DrMarioEngine {
   private _lockTimer = 0;
   private _cascadeTimer = 0;
   private _flashTimer = 0;
-  private _cellsToFlash: Set<string> = new Set();
+  private _cellsToFlash = new Set<string>();
   private _isLocking = false;
   private _pillsDropped = 0;
 
@@ -100,7 +106,13 @@ export class DrMarioEngine {
 
   // Test Helper: Set status directly
   public setStatus(
-    status: 'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'VICTORY' | 'FLASHING' | 'CASCADING',
+    status:
+      | 'PLAYING'
+      | 'PAUSED'
+      | 'GAME_OVER'
+      | 'VICTORY'
+      | 'FLASHING'
+      | 'CASCADING',
   ) {
     this._status = status;
   }
@@ -549,23 +561,25 @@ export class DrMarioEngine {
     }
 
     if (toRemove.size > 0) {
+      // Spec 3.6.7: Chained clears also use FLASHING animation
       toRemove.forEach((pos) => {
         const [x, y] = pos.split(',').map(Number);
-        if (this._grid[y][x].startsWith('VIRUS_')) {
-          // Award points for viruses even in chain (base only, no chain bonus per Spec 3.2.2.1)
+        const cell = this._grid[y][x];
+        if (cell.startsWith('VIRUS_')) {
+          // Award points for viruses in chain (base only, no chain bonus per Spec 3.2.2.1)
           const basePoints =
             this._speed === 'LOW' ? 100 : this._speed === 'MED' ? 200 : 300;
           this._score += basePoints;
         }
-        this._grid[y][x] = 'EMPTY';
+        // Convert to explosion cell type
+        const color = cell.split('_')[1];
+        this._grid[y][x] = `EXPLODE_${color}` as CellType;
       });
 
-      // Update virus count and check win
-      this._virusCount = this.countViruses();
-      if (this._virusCount === 0) {
-        this._status = 'VICTORY';
-        return true;
-      }
+      // Store cells to clear after flash and enter FLASHING
+      this._cellsToFlash = toRemove;
+      this._status = 'FLASHING';
+      this._flashTimer = 0;
 
       return true; // Return true to indicate matches were found
     }

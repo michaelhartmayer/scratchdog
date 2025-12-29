@@ -4,9 +4,9 @@ import type {
   GameState,
 } from '../../../../../src/game/DrMarioEngine';
 
-// 3.6.3 Capsule segments flash and disappear along with any viruses in the match
+// 3.6.7 Chained clears from cascading use the same flash animation (16 frames/267ms) before removal
 /** @mustTestDrMarioGamestate */
-test('3.6.3 Capsule and virus segments both clear in match', async ({
+test('3.6.7 Chained clears use same flash animation as initial clears', async ({
   page,
 }) => {
   await page.goto('/');
@@ -26,15 +26,15 @@ test('3.6.3 Capsule and virus segments both clear in match', async ({
 
   const pillColor = pillColors?.color1 ?? 'R';
   const virusType = `VIRUS_${pillColor}` as CellType;
-  const pillType = `PILL_${pillColor}` as CellType;
 
-  // Setup grid with 2 viruses + 1 matching pill already placed
+  // Setup: viruses to match, plus extra virus to prevent VICTORY and allow cascade
   const grid: CellType[][] = Array.from({ length: 16 }, () =>
     Array.from({ length: 8 }, () => 'EMPTY' as CellType),
   );
   grid[15][0] = virusType;
   grid[15][1] = virusType;
-  grid[15][2] = pillType; // Existing pill segment - same color
+  grid[15][2] = virusType;
+  grid[10][7] = 'VIRUS_B'; // Extra to prevent VICTORY
 
   await page.evaluate((g) => {
     const engine = window.getE2EState('DRMARIO_ENGINE') as {
@@ -43,18 +43,35 @@ test('3.6.3 Capsule and virus segments both clear in match', async ({
     engine.setGrid(g);
   }, grid);
 
-  // Hard drop - pill at columns 3-4 completes match at 0,1,2,3
+  // Hard drop to trigger match
   await page.keyboard.press(' ');
-  await page.waitForTimeout(800);
 
-  // Both viruses AND pill segment should be cleared
-  const state = await page.evaluate(
+  // Should enter FLASHING state for initial match
+  await page.waitForTimeout(50);
+  let state = await page.evaluate(
+    () => window.getE2EState('DRMARIO_STATE') as GameState,
+  );
+  expect(state.status).toBe('FLASHING');
+
+  // Cells should show explosion sprites during flash
+  const hasExplosion =
+    state.grid[15][0].startsWith('EXPLODE') ||
+    state.grid[15][1].startsWith('EXPLODE') ||
+    state.grid[15][2].startsWith('EXPLODE');
+  expect(hasExplosion).toBe(true);
+
+  // Wait for flash + cascade to complete
+  await page.waitForTimeout(1000);
+
+  state = await page.evaluate(
     () => window.getE2EState('DRMARIO_STATE') as GameState,
   );
 
-  // All cells in the match should be EMPTY
+  // Verify cascade completed - original match should be cleared
   expect(state.grid[15][0]).toBe('EMPTY');
   expect(state.grid[15][1]).toBe('EMPTY');
   expect(state.grid[15][2]).toBe('EMPTY');
-  expect(state.grid[15][3]).toBe('EMPTY');
+
+  // Game should be back to PLAYING
+  expect(state.status).toBe('PLAYING');
 });

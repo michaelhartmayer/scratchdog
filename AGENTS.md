@@ -4,3 +4,5 @@ When you must make a decision, you MUST request a specification update.
 
 See spec.md for details.  
 
+When implementing new specifications, you must always update the tests, and they should fail if the implementation is incorrect.  
+

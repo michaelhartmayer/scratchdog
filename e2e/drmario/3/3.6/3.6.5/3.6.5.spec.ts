@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
-import type { CellType, GameState } from '../../../../../src/game/DrMarioEngine';
+import type {
+  CellType,
+  GameState,
+} from '../../../../../src/game/DrMarioEngine';
 
 // 3.6.5 After the clear animation completes, unsupported capsule segments fall at 4 rows/second (250ms per row)
 // Test verifies: FLASHING (267ms) -> CASCADING (250ms/row gravity) timing
@@ -35,7 +38,7 @@ test('3.6.5 Cascade gravity runs at 250ms per row after flash completes', async 
   grid[10][7] = 'VIRUS_B'; // Extra to prevent VICTORY
 
   await page.evaluate((g) => {
-    const engine = window.getE2EState('DRMARIO_ENGINE') as unknown as {
+    const engine = window.getE2EState('DRMARIO_ENGINE') as {
       setGrid: (grid: CellType[][]) => void;
     };
     engine.setGrid(g);

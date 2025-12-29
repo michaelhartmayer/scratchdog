@@ -36,6 +36,7 @@
         3.6.4. Input is disabled during the clear animation; the player cannot move the next pill.  
         3.6.5. After the clear animation completes, unsupported capsule segments fall at 4 rows/second (250ms per row).  
         3.6.6. Each cascade re-checks for new matches, repeating the clear animation if needed.  
+        3.6.7. Chained clears from cascading use the same flash animation (16 frames/267ms) before removal.  
 4. Game States  
     4.1. Clear Condition  
         4.1.1. A stage is cleared when all viruses are eliminated.  
