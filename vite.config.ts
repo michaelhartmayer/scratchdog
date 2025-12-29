@@ -17,5 +17,6 @@ export default defineConfig({
   },
   server: {
     port: 8023,
+    allowedHosts: ['scratchdog.jellytests.com'],
   },
 } as VitestConfigExport);

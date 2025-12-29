@@ -134,4 +134,6 @@
         11.1.1. The SPEC.md file is created in the root of the project  
         11.1.2. The SPEC.md file is designed to look really good in a markdown viewer (specifically GitHub)  
         11.1.3. HTML is used to create a table of contents  
-
+12. Network  
+    12.1. Allowed Hosts  
+        12.1.1. add "scratchdog.jellytests.com" to `server.allowedHosts` in vite.config.js.
