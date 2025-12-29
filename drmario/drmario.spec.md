@@ -16,9 +16,20 @@
             3.1.2.1. Button A (X) rotates the pill 90 degrees clockwise.  
             3.1.2.2. Button B (Z) rotates the pill 90 degrees counter-clockwise.  
     3.2. Matching  
-        3.2.1. Aligning 4 or more color segments (virus or pill) vertically or horizontally eliminates them.  
-        3.2.2. Chain Reactions  
-            3.2.2.1. Chain reactions (cascading clears) do NOT award extra points.  
+        3.2.1. Alignment Clear Rules  
+            3.2.1.1. Aligning 4 or more color segments (virus or pill) vertically or horizontally eliminates them.  
+            3.2.1.2. Multidirectional Matches: If a segment participates in both a horizontal and a vertical match simultaneously (e.g., an L-shape or T-shape clear), all participating segments in both directions are cleared.  
+            3.2.1.3. Simultaneous Matches: Multiple independent matches (e.g., two parallel rows) occurring in the same tick are all cleared simultaneously.  
+            3.2.1.4. Extension: Matches of 5, 6, 7, or 8 segments are allowed and cleared in a single animation.  
+        3.2.2. Chain Reactions (Cascades)  
+            3.2.2.1. A chain reaction occurs when segments fall due to gravity and form new matches upon landing.  
+            3.2.2.2. Scoring: Chain reactions do NOT award bonus points or multipliers beyond the base score for the viruses cleared in that step.  
+            3.2.2.3. Animation: Each step of a chain reaction that results in a match triggers a new Clear Animation sequence (flashing).  
+        3.2.3. Capsule Breakage  
+            3.2.3.1. A pill (megavitamin) is composed of two color segments.  
+            3.2.3.2. When an elimination match (4+ in a row) is detected, only the specific segments (pill halves or viruses) directly participating in that match are cleared.  
+            3.2.3.3. If only one segment of a capsule is cleared, the link between the two segments is broken. The remaining segment stays on the board as a single, independent unit.  
+            3.2.3.4. If both segments of a capsule are cleared (either by the same match or different matches simultaneously), the entire pill is effectively removed from the board.  
     3.3. Gravity  
         3.3.1. Unsupported pill segments fall downwards until they hit a supported surface.  
         3.3.2. Speed Levels  
@@ -37,6 +48,17 @@
         3.6.5. After the clear animation completes, unsupported capsule segments fall at 4 rows/second (250ms per row).  
         3.6.6. Each cascade re-checks for new matches, repeating the clear animation if needed.  
         3.6.7. Chained clears from cascading use the same flash animation (16 frames/267ms) before removal.  
+    3.7. Victory Animation  
+        3.7.1. Trigger: Initiated immediately after the final virus is cleared and all resulting cascades have completed.  
+        3.7.2. Mechanics:  
+            3.7.2.1. Descending Sweep: A horizontal "purge" effect moves from the top row (Row 0) to the bottom row (Row 15).  
+            3.7.2.2. Timing: Rows are processed sequentially at a rate of 100ms per row (Fixed 6 frames at 60fps).  
+            3.7.2.3. Transformation: As the sweep passes a row, all non-EMPTY cells in that row are converted to their respective EXPLODE state (e.g., PILL_R -> EXPLODE_R).  
+            3.7.2.4. Trailing Cleanup: EXPLODE cells created by the sweep persist for 200ms before being permanently replaced by EMPTY cells.  
+            3.7.2.5. Overlap: The sweep moves to the next row every 100ms, while the cleanup takes 200ms, creating a "trailing explosion" effect spanning two rows simultaneously.  
+        3.7.3. Duration: Total sweep time is 1.6 seconds (16 rows * 100ms), with a final 200ms pause for the bottom row's cleanup.  
+        3.7.4. State: The game status remains in a specialized WIN_ANIMATION state until the sequence completes.  
+        3.7.5. Input: All player controls are disabled throughout the animation.  
 4. Game States  
     4.1. Clear Condition  
         4.1.1. A stage is cleared when all viruses are eliminated.  
@@ -67,7 +89,7 @@
         6.3.1. Virus Count = 4 * (Level + 1).  
         6.3.2. Maximum virus count is capped at 84 (Level 20+).  
 7. Technical Details  
-    7.1. There should only be one game canvas on screen at a given time. 
+    7.1. There should only be one game canvas on screen at a given time.  
 8. UI  
     8.1. Pill Bottle  
         8.1.1. The play area is contained within a medicine bottle shape.  
@@ -85,3 +107,4 @@
         8.4.1. Pills are capsule-shaped with two colored halves.  
         8.4.2. Each half is a solid color (R/Y/B).  
         8.4.3. Pills have a slight 3D shading/highlight effect.  
+

@@ -8,6 +8,8 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
-interface Window {
-  getE2EState: (key: string) => unknown;
+declare global {
+  interface Window {
+    getE2EState: (key: string) => unknown;
+  }
 }

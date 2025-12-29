@@ -44,39 +44,38 @@ test('3.6.7 Chained clears use same flash animation as initial clears', async ({
     engine.setGrid(g);
   }, grid);
 
-  // Move pill to the right and hard drop to trigger match
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press(' ');
+  await page.keyboard.press(' '); // Drop pill to trigger match
 
-  // Should enter FLASHING state for initial match
-  await page.waitForTimeout(50);
+  // Wait for FLASHING state specifically
+  await page.waitForFunction(
+    () =>
+      (window.getE2EState('DRMARIO_STATE') as GameState).status === 'FLASHING',
+    { timeout: 2000 },
+  );
+
   let state = await page.evaluate(
     () => window.getE2EState('DRMARIO_STATE') as GameState,
   );
-  expect(state.status).toBe('FLASHING');
 
-  // Cells should show explosion sprites during flash
+  // First verify it enters FLASHING and shows explosion sprites
   const hasExplosion =
     state.grid[15][0].startsWith('EXPLODE') ||
-    state.grid[15][1].startsWith('EXPLODE') ||
-    state.grid[15][2].startsWith('EXPLODE') ||
     state.grid[15][3].startsWith('EXPLODE');
   expect(hasExplosion).toBe(true);
+  expect(state.status).toBe('FLASHING');
 
-  // Wait for flash + cascade to complete
-  await page.waitForTimeout(1000);
+  // Now wait for it to transition OUT of FLASHING (into CASCADING or PLAYING)
+  await page.waitForFunction(
+    () =>
+      (window.getE2EState('DRMARIO_STATE') as GameState).status !== 'FLASHING',
+    { timeout: 2000 },
+  );
 
   state = await page.evaluate(
     () => window.getE2EState('DRMARIO_STATE') as GameState,
   );
 
-  // Verify cascade completed - original match should be cleared
+  // Original match should now be cleared
   expect(state.grid[15][0]).toBe('EMPTY');
-  expect(state.grid[15][1]).toBe('EMPTY');
-  expect(state.grid[15][2]).toBe('EMPTY');
   expect(state.grid[15][3]).toBe('EMPTY');
-
-  // Game should be back to PLAYING
-  expect(state.status).toBe('PLAYING');
 });

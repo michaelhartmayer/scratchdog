@@ -4,9 +4,11 @@ import type {
   GameState,
 } from '../../../../../src/game/DrMarioEngine';
 
-// 3.6.4 Player controls are disabled during the clear animation (flashing and cascading)
+// 3.7.5 Input: All player controls are disabled throughout the animation.
 /** @mustTestDrMarioGamestate */
-test('3.6.4 Input is disabled during CASCADING animation', async ({ page }) => {
+test('3.7.5 Player input is disabled during victory animation', async ({
+  page,
+}) => {
   await page.goto('/');
   await page.click('body');
   await page.click('text=New Game');
@@ -16,7 +18,6 @@ test('3.6.4 Input is disabled during CASCADING animation', async ({ page }) => {
       window.getE2EState('DRMARIO_ENGINE') !== undefined,
   );
 
-  // Setup: match that will result in a cascade
   const grid: CellType[][] = Array.from({ length: 16 }, () =>
     Array.from({ length: 8 }, () => 'EMPTY' as CellType),
   );
@@ -24,10 +25,6 @@ test('3.6.4 Input is disabled during CASCADING animation', async ({ page }) => {
   grid[15][1] = 'VIRUS_R';
   grid[15][2] = 'VIRUS_R';
   grid[15][3] = 'VIRUS_R';
-  grid[10][7] = 'VIRUS_B'; // Prevent VICTORY
-
-  // Floating pill segment that will fall
-  grid[5][0] = 'PILL_B_LEFT';
 
   await page.evaluate((g) => {
     const engine = window.getE2EState('DRMARIO_ENGINE') as {
@@ -36,28 +33,23 @@ test('3.6.4 Input is disabled during CASCADING animation', async ({ page }) => {
     engine.setGrid(g);
   }, grid);
 
-  await page.keyboard.press(' '); // Drop pill to trigger match
-
-  // Wait specifically for CASCADING state
+  await page.keyboard.press(' ');
   await page.waitForFunction(
     () =>
-      (window.getE2EState('DRMARIO_STATE') as GameState).status === 'CASCADING',
-    { timeout: 5000 },
+      (window.getE2EState('DRMARIO_STATE') as GameState).status ===
+      'WIN_ANIMATION',
+    { timeout: 2000 },
   );
 
-  const stateDuring = await page.evaluate(
+  let state = await page.evaluate(
     () => window.getE2EState('DRMARIO_STATE') as GameState,
   );
-  expect(stateDuring.status).toBe('CASCADING');
+  expect(state.status).toBe('WIN_ANIMATION');
 
-  // Try to move during CASCADING
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('p'); // pause
-
-  const stateAfter = await page.evaluate(
+  // Try to pause
+  await page.keyboard.press('p');
+  state = await page.evaluate(
     () => window.getE2EState('DRMARIO_STATE') as GameState,
   );
-
-  // Still CASCADING (or back to PLAYING if finished, but NOT paused)
-  expect(stateAfter.status).not.toBe('PAUSED');
+  expect(state.status).toBe('WIN_ANIMATION'); // Should NOT be PAUSED
 });

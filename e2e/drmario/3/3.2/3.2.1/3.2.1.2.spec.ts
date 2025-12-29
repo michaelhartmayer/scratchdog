@@ -4,9 +4,10 @@ import type {
   GameState,
 } from '../../../../../src/game/DrMarioEngine';
 
-// 3.6.5 Gravity is applied to unsupported segments after 250ms/row
+// 3.2.1.2 Multidirectional Matches: If a segment participates in both a horizontal and a vertical match simultaneously (e.g., an L-shape or T-shape clear), all participating segments in both directions are cleared.
+
 /** @mustTestDrMarioGamestate */
-test('3.6.5 Cells fall one row after flash completes', async ({ page }) => {
+test('3.2.1.2 Multidirectional match (L-Shape)', async ({ page }) => {
   await page.goto('/');
   await page.click('body');
   await page.click('text=New Game');
@@ -16,18 +17,22 @@ test('3.6.5 Cells fall one row after flash completes', async ({ page }) => {
       window.getE2EState('DRMARIO_ENGINE') !== undefined,
   );
 
+  // Setup: L-shape match at (15,0)
+  // Horizontal: (15,0), (15,1), (15,2), (15,3) - all Red
+  // Vertical: (15,0), (14,0), (13,0), (12,0) - all Red
   const grid: CellType[][] = Array.from({ length: 16 }, () =>
     Array.from({ length: 8 }, () => 'EMPTY' as CellType),
   );
-  // Match 4 viruses at bottom
   grid[15][0] = 'VIRUS_R';
   grid[15][1] = 'VIRUS_R';
   grid[15][2] = 'VIRUS_R';
   grid[15][3] = 'VIRUS_R';
-  grid[10][7] = 'VIRUS_B'; // Prevent VICTORY
 
-  // Floating pill segment at row 5
-  grid[5][0] = 'PILL_B_LEFT';
+  grid[14][0] = 'VIRUS_R';
+  grid[13][0] = 'VIRUS_R';
+  grid[12][0] = 'VIRUS_R';
+
+  grid[10][7] = 'VIRUS_B'; // Prevent VICTORY
 
   await page.evaluate((g) => {
     const engine = window.getE2EState('DRMARIO_ENGINE') as {
@@ -36,23 +41,18 @@ test('3.6.5 Cells fall one row after flash completes', async ({ page }) => {
     engine.setGrid(g);
   }, grid);
 
-  await page.keyboard.press(' '); // Match
+  // Trigger match
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press(' ');
 
-  // Wait for FLASHING
   await page.waitForFunction(
     () =>
       (window.getE2EState('DRMARIO_STATE') as GameState).status === 'FLASHING',
     { timeout: 5000 },
   );
 
-  // Wait for CASCADING
-  await page.waitForFunction(
-    () =>
-      (window.getE2EState('DRMARIO_STATE') as GameState).status === 'CASCADING',
-    { timeout: 5000 },
-  );
-
-  // Wait until it transitions back to PLAYING (gravity done)
   await page.waitForFunction(
     () =>
       (window.getE2EState('DRMARIO_STATE') as GameState).status === 'PLAYING',
@@ -63,6 +63,14 @@ test('3.6.5 Cells fall one row after flash completes', async ({ page }) => {
     () => window.getE2EState('DRMARIO_STATE') as GameState,
   );
 
-  // Pill should have fallen to row 15 (it was at row 5, matched viruses are now EMPTY)
-  expect(state.grid[15][0]).toBe('PILL_B_LEFT');
+  // Horizontal segments should be cleared
+  expect(state.grid[15][0]).toBe('EMPTY');
+  expect(state.grid[15][1]).toBe('EMPTY');
+  expect(state.grid[15][2]).toBe('EMPTY');
+  expect(state.grid[15][3]).toBe('EMPTY');
+
+  // Vertical segments should be cleared
+  expect(state.grid[14][0]).toBe('EMPTY');
+  expect(state.grid[13][0]).toBe('EMPTY');
+  expect(state.grid[12][0]).toBe('EMPTY');
 });

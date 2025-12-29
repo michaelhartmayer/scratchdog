@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import type { GameState } from '../../../../../src/game/DrMarioEngine';
 
 // 3.1.1 Pills can be moved left, right, and rotated 90 degrees
@@ -22,25 +22,31 @@ test('3.1.1 Pills can move left, right, down, and rotate', async ({ page }) => {
 
   // Move left
   await page.keyboard.press('ArrowLeft');
-  let state = await page.evaluate(
-    () => window.getE2EState('DRMARIO_STATE') as GameState,
+  await page.waitForFunction(
+    (x) =>
+      (window.getE2EState('DRMARIO_STATE') as GameState).activePill?.x ===
+      x - 1,
+    initialX,
   );
-  expect(state.activePill?.x).toBeLessThan(initialX);
 
   // Move right
   await page.keyboard.press('ArrowRight');
-  await page.waitForTimeout(150);
-  state = await page.evaluate(
-    () => window.getE2EState('DRMARIO_STATE') as GameState,
+  await page.waitForFunction(
+    (x) =>
+      (window.getE2EState('DRMARIO_STATE') as GameState).activePill?.x === x,
+    initialX,
   );
-  expect(state.activePill?.x).toBe(initialX);
 
   // Move down
-  const initialY = state.activePill?.y ?? 0;
-  await page.keyboard.press('ArrowDown');
-  await page.waitForTimeout(150);
-  state = await page.evaluate(
+  const state = await page.evaluate(
     () => window.getE2EState('DRMARIO_STATE') as GameState,
   );
-  expect(state.activePill?.y).toBeGreaterThan(initialY);
+  const initialY = state.activePill?.y ?? 0;
+  await page.keyboard.press('ArrowDown');
+  await page.waitForFunction(
+    (y) =>
+      (window.getE2EState('DRMARIO_STATE') as GameState).activePill?.y ===
+      y + 1,
+    initialY,
+  );
 });

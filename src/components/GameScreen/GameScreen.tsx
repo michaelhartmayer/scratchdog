@@ -16,8 +16,20 @@ const CELL_EMOJI: Record<CellType, string> = {
   VIRUS_Y: '👻',
   VIRUS_B: '👾',
   PILL_R: '🔴',
+  PILL_R_LEFT: '🔴',
+  PILL_R_RIGHT: '🔴',
+  PILL_R_TOP: '🔴',
+  PILL_R_BOTTOM: '🔴',
   PILL_Y: '🟡',
+  PILL_Y_LEFT: '🟡',
+  PILL_Y_RIGHT: '🟡',
+  PILL_Y_TOP: '🟡',
+  PILL_Y_BOTTOM: '🟡',
   PILL_B: '🔵',
+  PILL_B_LEFT: '🔵',
+  PILL_B_RIGHT: '🔵',
+  PILL_B_TOP: '🔵',
+  PILL_B_BOTTOM: '🔵',
   EXPLODE_R: '💥',
   EXPLODE_Y: '💥',
   EXPLODE_B: '💥',
@@ -39,7 +51,10 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
   const [paused, setPaused] = useState(false);
   const [score, setScore] = useState(0);
   const [virusCount, setVirusCount] = useState(0);
-  const [nextPill, setNextPill] = useState<{ color1: PillColor; color2: PillColor } | null>(null);
+  const [nextPill, setNextPill] = useState<{
+    color1: PillColor;
+    color2: PillColor;
+  } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<DrMarioEngine>(new DrMarioEngine());
 
@@ -219,26 +234,53 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
           <Text variant="heading">{score}</Text>
         </div>
 
-        <div className="glass-panel" style={{ padding: '10px 15px', textAlign: 'right' }}>
+        <div
+          className="glass-panel"
+          style={{ padding: '10px 15px', textAlign: 'center' }}
+        >
           <div style={{ marginBottom: '4px' }}>
             <Text variant="overline">NEXT</Text>
           </div>
-          <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
+          <div
+            style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}
+          >
             {nextPill ? (
               <>
-                <div className={`pill-segment ${nextPill.color1.toLowerCase()}`} style={{ width: '24px', height: '24px', borderRadius: '50%' }} />
-                <div className={`pill-segment ${nextPill.color2.toLowerCase()}`} style={{ width: '24px', height: '24px', borderRadius: '50%' }} />
+                <div
+                  className={`pill-segment ${nextPill.color1.toLowerCase()}`}
+                  style={{ width: '16px', height: '16px', borderRadius: '50%' }}
+                />
+                <div
+                  className={`pill-segment ${nextPill.color2.toLowerCase()}`}
+                  style={{ width: '16px', height: '16px', borderRadius: '50%' }}
+                />
               </>
             ) : (
-              <div style={{ width: '52px', height: '24px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }} />
+              <div
+                style={{
+                  width: '36px',
+                  height: '16px',
+                  background: 'rgba(255,255,255,0.05)',
+                  borderRadius: '8px',
+                }}
+              />
             )}
           </div>
+        </div>
+
+        <div
+          className="glass-panel"
+          style={{ padding: '10px 15px', textAlign: 'right' }}
+        >
+          <div style={{ marginBottom: '4px' }}>
+            <Text variant="overline">VIRUSES:</Text>
+          </div>
+          <Text variant="heading">{virusCount}</Text>
         </div>
       </div>
 
       <div id="pill-bottle">
         <div id="bottle-neck" />
-        {/* PixiJS Container */}
         <div
           ref={containerRef}
           className="game-center"
@@ -250,10 +292,6 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
             overflow: 'hidden',
           }}
         />
-      </div>
-
-      <div style={{ marginTop: '20px', opacity: 0.6 }}>
-        <Text variant="caption">VIRUSES: {virusCount}</Text>
       </div>
 
       {paused && (

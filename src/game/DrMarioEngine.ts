@@ -6,6 +6,18 @@ export type CellType =
   | 'PILL_R'
   | 'PILL_Y'
   | 'PILL_B'
+  | 'PILL_R_LEFT'
+  | 'PILL_R_RIGHT'
+  | 'PILL_R_TOP'
+  | 'PILL_R_BOTTOM'
+  | 'PILL_Y_LEFT'
+  | 'PILL_Y_RIGHT'
+  | 'PILL_Y_TOP'
+  | 'PILL_Y_BOTTOM'
+  | 'PILL_B_LEFT'
+  | 'PILL_B_RIGHT'
+  | 'PILL_B_TOP'
+  | 'PILL_B_BOTTOM'
   | 'EXPLODE_R'
   | 'EXPLODE_Y'
   | 'EXPLODE_B';
@@ -31,7 +43,8 @@ export interface GameState {
     | 'GAME_OVER'
     | 'VICTORY'
     | 'FLASHING'
-    | 'CASCADING';
+    | 'CASCADING'
+    | 'WIN_ANIMATION';
   activePill: ActivePill | null;
   nextPill: { color1: PillColor; color2: PillColor } | null;
   virusCount: number;
@@ -55,7 +68,8 @@ export class DrMarioEngine {
     | 'GAME_OVER'
     | 'VICTORY'
     | 'FLASHING'
-    | 'CASCADING' = 'PLAYING';
+    | 'CASCADING'
+    | 'WIN_ANIMATION' = 'PLAYING';
   private _activePill: ActivePill | null = null;
   private _nextPill: { color1: PillColor; color2: PillColor } | null = null;
   private _virusCount = 0;
@@ -66,6 +80,9 @@ export class DrMarioEngine {
   private _cellsToFlash = new Set<string>();
   private _isLocking = false;
   private _pillsDropped = 0;
+  private _winAnimRow = -1;
+  private _winAnimTimer = 0;
+  private _winAnimCells = new Map<string, number>();
 
   // Spec 3.6.1: Flash duration = 16 frames at 60fps = ~267ms
   private readonly FLASH_DURATION = 267;
@@ -112,7 +129,8 @@ export class DrMarioEngine {
       | 'GAME_OVER'
       | 'VICTORY'
       | 'FLASHING'
-      | 'CASCADING',
+      | 'CASCADING'
+      | 'WIN_ANIMATION',
   ) {
     this._status = status;
   }
@@ -398,12 +416,13 @@ export class DrMarioEngine {
 
     const { x, y, color1, color2, orientation } = this._activePill;
 
-    // Place pill on grid
-    this._grid[y][x] = `PILL_${color1}` as CellType;
+    // Place pill on grid with orientation-aware types
     if (orientation === 'HORIZONTAL') {
-      this._grid[y][x + 1] = `PILL_${color2}` as CellType;
+      this._grid[y][x] = `PILL_${color1}_LEFT` as CellType;
+      this._grid[y][x + 1] = `PILL_${color2}_RIGHT` as CellType;
     } else {
-      this._grid[y + 1][x] = `PILL_${color2}` as CellType;
+      this._grid[y][x] = `PILL_${color1}_TOP` as CellType;
+      this._grid[y + 1][x] = `PILL_${color2}_BOTTOM` as CellType;
     }
 
     this._activePill = null;
@@ -473,9 +492,48 @@ export class DrMarioEngine {
         const cell = this._grid[y][x];
         if (cell.startsWith('VIRUS_')) virusesCleared++;
 
+        // Breaking logic: If we remove a segment, its neighbor might need to break
+        if (cell.startsWith('PILL_')) {
+          if (cell.endsWith('_LEFT')) {
+            const right = this._grid[y][x + 1];
+            if (
+              right.endsWith('_RIGHT') &&
+              !toRemove.has(`${String(x + 1)},${String(y)}`)
+            ) {
+              this._grid[y][x + 1] = right.replace('_RIGHT', '') as CellType;
+            }
+          } else if (cell.endsWith('_RIGHT')) {
+            const left = this._grid[y][x - 1];
+            if (
+              left.endsWith('_LEFT') &&
+              !toRemove.has(`${String(x - 1)},${String(y)}`)
+            ) {
+              this._grid[y][x - 1] = left.replace('_LEFT', '') as CellType;
+            }
+          } else if (cell.endsWith('_TOP')) {
+            const bottom = this._grid[y + 1][x];
+            if (
+              bottom.endsWith('_BOTTOM') &&
+              !toRemove.has(`${String(x)},${String(y + 1)}`)
+            ) {
+              this._grid[y + 1][x] = bottom.replace('_BOTTOM', '') as CellType;
+            }
+          } else if (cell.endsWith('_BOTTOM')) {
+            const top = this._grid[y - 1][x];
+            if (
+              top.endsWith('_TOP') &&
+              !toRemove.has(`${String(x)},${String(y - 1)}`)
+            ) {
+              this._grid[y - 1][x] = top.replace('_TOP', '') as CellType;
+            }
+          }
+        }
+
         // Convert to explosion cell type
-        const color = cell.split('_')[1];
-        this._grid[y][x] = `EXPLODE_${color}` as CellType;
+        const color = this.getMatchColor(cell);
+        if (color) {
+          this._grid[y][x] = `EXPLODE_${color}` as CellType;
+        }
       });
 
       // Calculate score (Spec 5.1)
@@ -506,20 +564,80 @@ export class DrMarioEngine {
   }
 
   // Spec 6.2.3: Cascade fall speed (1 row per 250ms)
+  private isTraversable(x: number, y: number): boolean {
+    if (y < 0 || y >= this.HEIGHT || x < 0 || x >= this.WIDTH) return false;
+    const cell = this._grid[y][x];
+    return cell === 'EMPTY' || cell.startsWith('EXPLODE_');
+  }
+
   private applyGravityStep(): boolean {
     let changed = false;
+    const processed = new Set<string>();
+
     // Iterate from bottom up
     for (let y = this.HEIGHT - 2; y >= 0; y--) {
       for (let x = 0; x < this.WIDTH; x++) {
-        // If current is tile and below is EMPTY
+        if (processed.has(`${String(x)},${String(y)}`)) continue;
+
+        const cell = this._grid[y][x];
         if (
-          this._grid[y][x] !== 'EMPTY' &&
-          !this._grid[y][x].startsWith('VIRUS_') && // Viruses don't fall
-          this._grid[y + 1][x] === 'EMPTY'
+          cell === 'EMPTY' ||
+          cell.startsWith('VIRUS_') ||
+          cell.startsWith('EXPLODE_')
+        )
+          continue;
+
+        // Handle Horizontal Pills
+        if (cell.endsWith('_LEFT')) {
+          const right = this._grid[y][x + 1];
+          // If right partner is empty below AND left is empty below
+          if (
+            right.endsWith('_RIGHT') &&
+            this.isTraversable(x, y + 1) &&
+            this.isTraversable(x + 1, y + 1)
+          ) {
+            this._grid[y + 1][x] = cell;
+            this._grid[y + 1][x + 1] = right;
+            this._grid[y][x] = 'EMPTY';
+            this._grid[y][x + 1] = 'EMPTY';
+            processed.add(`${String(x)},${String(y)}`);
+            processed.add(`${String(x + 1)},${String(y)}`);
+            changed = true;
+          }
+        } else if (cell.endsWith('_TOP')) {
+          // Handle Vertical Pills: Partner is at y+1.
+          // Since we iterate bottom up, we'll see BOTTOM first?
+          // No, we go y = HEIGHT-2 down to 0.
+          // Row 15 is bottom. y=14 is HEIGHT-2.
+          // If y=14 is TOP, y+1=15 is BOTTOM.
+          // Wait, if it's a vertical pill, BOTTOM is below TOP.
+          // If BOTTOM is at 15, it can't fall.
+          // If BOTTOM is at 14, and 15 is EMPTY, it falls.
+          // When BOTTOM falls, TOP at 13 falls too.
+          // Actually, let's handle BOTTOM first in the loop.
+        } else if (cell.endsWith('_BOTTOM')) {
+          const top = this._grid[y - 1][x];
+          if (top.endsWith('_TOP') && this.isTraversable(x, y + 1)) {
+            this._grid[y + 1][x] = cell;
+            this._grid[y][x] = top;
+            this._grid[y - 1][x] = 'EMPTY';
+            processed.add(`${String(x)},${String(y)}`);
+            processed.add(`${String(x)},${String(y - 1)}`);
+            changed = true;
+          }
+        } else if (
+          !cell.endsWith('_LEFT') &&
+          !cell.endsWith('_RIGHT') &&
+          !cell.endsWith('_TOP') &&
+          !cell.endsWith('_BOTTOM')
         ) {
-          this._grid[y + 1][x] = this._grid[y][x];
-          this._grid[y][x] = 'EMPTY';
-          changed = true;
+          // Single independent segment
+          if (this.isTraversable(x, y + 1)) {
+            this._grid[y + 1][x] = cell;
+            this._grid[y][x] = 'EMPTY';
+            processed.add(`${String(x)},${String(y)}`);
+            changed = true;
+          }
         }
       }
     }
@@ -562,19 +680,65 @@ export class DrMarioEngine {
 
     if (toRemove.size > 0) {
       // Spec 3.6.7: Chained clears also use FLASHING animation
+      let virusesClearedCount = 0;
       toRemove.forEach((pos) => {
         const [x, y] = pos.split(',').map(Number);
         const cell = this._grid[y][x];
         if (cell.startsWith('VIRUS_')) {
-          // Award points for viruses in chain (base only, no chain bonus per Spec 3.2.2.1)
-          const basePoints =
-            this._speed === 'LOW' ? 100 : this._speed === 'MED' ? 200 : 300;
-          this._score += basePoints;
+          virusesClearedCount++;
         }
+
+        // Breaking logic: If we remove a segment, its neighbor might need to break
+        if (cell.startsWith('PILL_')) {
+          if (cell.endsWith('_LEFT')) {
+            const right = this._grid[y][x + 1];
+            if (
+              right.endsWith('_RIGHT') &&
+              !toRemove.has(`${String(x + 1)},${String(y)}`)
+            ) {
+              this._grid[y][x + 1] = right.replace('_RIGHT', '') as CellType;
+            }
+          } else if (cell.endsWith('_RIGHT')) {
+            const left = this._grid[y][x - 1];
+            if (
+              left.endsWith('_LEFT') &&
+              !toRemove.has(`${String(x - 1)},${String(y)}`)
+            ) {
+              this._grid[y][x - 1] = left.replace('_LEFT', '') as CellType;
+            }
+          } else if (cell.endsWith('_TOP')) {
+            const bottom = this._grid[y + 1][x];
+            if (
+              bottom.endsWith('_BOTTOM') &&
+              !toRemove.has(`${String(x)},${String(y + 1)}`)
+            ) {
+              this._grid[y + 1][x] = bottom.replace('_BOTTOM', '') as CellType;
+            }
+          } else if (cell.endsWith('_BOTTOM')) {
+            const top = this._grid[y - 1][x];
+            if (
+              top.endsWith('_TOP') &&
+              !toRemove.has(`${String(x)},${String(y - 1)}`)
+            ) {
+              this._grid[y - 1][x] = top.replace('_TOP', '') as CellType;
+            }
+          }
+        }
+
         // Convert to explosion cell type
-        const color = cell.split('_')[1];
-        this._grid[y][x] = `EXPLODE_${color}` as CellType;
+        const color = this.getMatchColor(cell);
+        if (color) {
+          this._grid[y][x] = `EXPLODE_${color}` as CellType;
+        }
       });
+
+      // Award points for viruses in chain (Spec 5.1/3.2.2)
+      if (virusesClearedCount > 0) {
+        const basePoints =
+          this._speed === 'LOW' ? 100 : this._speed === 'MED' ? 200 : 300;
+        const multiplier = 2 ** (virusesClearedCount - 1);
+        this._score += basePoints * virusesClearedCount * multiplier;
+      }
 
       // Store cells to clear after flash and enter FLASHING
       this._cellsToFlash = toRemove;
@@ -586,80 +750,94 @@ export class DrMarioEngine {
     return false;
   }
 
-  public tick(deltaMs: number) {
-    // Spec 3.6.1: Handle FLASHING state (267ms flash before clearing)
+  public tick(dtMs: number) {
+    const deltaMs = Math.min(dtMs, 250); // Cap at 250ms (one cascade step) to allow progress during lag
     if (this._status === 'FLASHING') {
       this._flashTimer += deltaMs;
       if (this._flashTimer >= this.FLASH_DURATION) {
-        // Flash complete - clear the explosion cells
         this._cellsToFlash.forEach((pos) => {
           const [x, y] = pos.split(',').map(Number);
           this._grid[y][x] = 'EMPTY';
         });
         this._cellsToFlash.clear();
 
-        // Update virus count and check victory
         this._virusCount = this.countViruses();
         if (this._virusCount === 0) {
-          this._status = 'VICTORY';
-          return;
+          this._status = 'WIN_ANIMATION';
+          this._winAnimRow = -1;
+          this._winAnimTimer = 100;
+          this._winAnimCells.clear();
+        } else {
+          this._status = 'CASCADING';
+          this._cascadeTimer = 0;
         }
-
-        // Enter CASCADING for gravity
-        this._status = 'CASCADING';
-        this._cascadeTimer = 0;
       }
-      return;
-    }
-
-    if (this._status === 'CASCADING') {
+    } else if (this._status === 'WIN_ANIMATION') {
+      this._winAnimTimer += deltaMs;
+      for (const [pos, ttl] of Array.from(this._winAnimCells.entries())) {
+        const newTTL = ttl - deltaMs;
+        if (newTTL <= 0) {
+          const [x, y] = pos.split(',').map(Number);
+          this._grid[y][x] = 'EMPTY';
+          this._winAnimCells.delete(pos);
+        } else {
+          this._winAnimCells.set(pos, newTTL);
+        }
+      }
+      if (this._winAnimTimer >= 100) {
+        this._winAnimTimer = 0;
+        this._winAnimRow++;
+        if (this._winAnimRow < this.HEIGHT) {
+          for (let x = 0; x < this.WIDTH; x++) {
+            const cell = this._grid[this._winAnimRow][x];
+            if (cell !== 'EMPTY') {
+              const color = cell.split('_')[1] || 'R';
+              this._grid[this._winAnimRow][x] = `EXPLODE_${color}` as CellType;
+              this._winAnimCells.set(
+                `${String(x)},${String(this._winAnimRow)}`,
+                200,
+              );
+            }
+          }
+        } else if (this._winAnimCells.size === 0) {
+          this._status = 'VICTORY';
+        }
+      }
+    } else if (this._status === 'CASCADING') {
       this._cascadeTimer += deltaMs;
-      // 4 rows per second = 250ms per row (Spec 6.2.3)
       if (this._cascadeTimer >= 250) {
         this._cascadeTimer = 0;
         const moved = this.applyGravityStep();
         if (!moved) {
-          // Gravity done, check for new matches
           const matchesFound = this.checkMatchesAfterGravity();
           if (matchesFound) {
-            // If new matches found, they are cleared, keep cascading to let things fall into new empty space
             this._cascadeTimer = 0;
           } else {
-            // No movement, no matches, sequence done
-            if ((this._status as string) !== 'VICTORY') {
+            const status = this._status as string;
+            if (status !== 'VICTORY' && status !== 'WIN_ANIMATION') {
               this.spawnPill();
               this._status = 'PLAYING';
             }
           }
         }
       }
-      return;
-    }
-
-    if (this._status !== 'PLAYING' || !this._activePill) return;
-
-    this._dropTimer += deltaMs;
-
-    const dropInterval = this.getDropInterval();
-
-    if (this._dropTimer >= dropInterval) {
-      this._dropTimer = 0;
-
-      // Try to move down
-      if (!this.movePill(0, 1)) {
-        // Can't move down, start locking
-        if (!this._isLocking) {
-          this._isLocking = true;
-          this._lockTimer = 0;
+    } else if (this._status === 'PLAYING' && this._activePill) {
+      this._dropTimer += deltaMs;
+      const dropInterval = this.getDropInterval();
+      if (this._dropTimer >= dropInterval) {
+        this._dropTimer = 0;
+        if (!this.movePill(0, 1)) {
+          if (!this._isLocking) {
+            this._isLocking = true;
+            this._lockTimer = 0;
+          }
         }
       }
-    }
-
-    // Handle locking (Spec 3.5)
-    if (this._isLocking) {
-      this._lockTimer += deltaMs;
-      if (this._lockTimer >= this.LOCK_DELAY) {
-        this.lockPill();
+      if (this._isLocking) {
+        this._lockTimer += deltaMs;
+        if (this._lockTimer >= this.LOCK_DELAY) {
+          this.lockPill();
+        }
       }
     }
   }

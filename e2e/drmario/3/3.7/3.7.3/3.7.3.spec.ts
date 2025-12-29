@@ -4,11 +4,9 @@ import type {
   GameState,
 } from '../../../../../src/game/DrMarioEngine';
 
-// 3.6.1 When a match is made, matched segments flash for 16 frames (~267ms at 60fps) before being removed
+// 3.7.3 Duration: Total sweep time is 1.6 seconds (16 rows * 100ms), with a final 200ms pause for the bottom row's cleanup.
 /** @mustTestDrMarioGamestate */
-test('3.6.1 Matched segments flash for ~267ms before being removed', async ({
-  page,
-}) => {
+test('3.7.3 Victory Animation duration', async ({ page }) => {
   await page.goto('/');
   await page.click('body');
   await page.click('text=New Game');
@@ -25,7 +23,6 @@ test('3.6.1 Matched segments flash for ~267ms before being removed', async ({
   grid[15][1] = 'VIRUS_R';
   grid[15][2] = 'VIRUS_R';
   grid[15][3] = 'VIRUS_R';
-  grid[10][7] = 'VIRUS_B'; // Prevent VICTORY
 
   await page.evaluate((g) => {
     const engine = window.getE2EState('DRMARIO_ENGINE') as {
@@ -34,30 +31,24 @@ test('3.6.1 Matched segments flash for ~267ms before being removed', async ({
     engine.setGrid(g);
   }, grid);
 
-  await page.keyboard.press(' '); // Drop pill to trigger match
-
-  // Wait for FLASHING state
+  await page.keyboard.press(' ');
   await page.waitForFunction(
     () =>
-      (window.getE2EState('DRMARIO_STATE') as GameState).status === 'FLASHING',
-    { timeout: 5000 },
+      (window.getE2EState('DRMARIO_STATE') as GameState).status ===
+      'WIN_ANIMATION',
+    { timeout: 2000 },
   );
 
-  let state = await page.evaluate(
-    () => window.getE2EState('DRMARIO_STATE') as GameState,
-  );
-  expect(state.grid[15][0].startsWith('EXPLODE')).toBe(true);
-
-  // Wait for cells to be cleared
+  const startTime = Date.now();
   await page.waitForFunction(
     () =>
-      (window.getE2EState('DRMARIO_STATE') as GameState).grid[15][0] ===
-      'EMPTY',
+      (window.getE2EState('DRMARIO_STATE') as GameState).status === 'VICTORY',
     { timeout: 5000 },
   );
+  const endTime = Date.now();
 
-  state = await page.evaluate(
-    () => window.getE2EState('DRMARIO_STATE') as GameState,
-  );
-  expect(state.grid[15][0]).toBe('EMPTY');
+  const duration = endTime - startTime;
+  // 1.6s sweep + 0.2s cleanup = 1.8s
+  expect(duration).toBeGreaterThan(1600);
+  expect(duration).toBeLessThan(2500);
 });

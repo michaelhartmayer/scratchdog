@@ -4,9 +4,11 @@ import type {
   GameState,
 } from '../../../../../src/game/DrMarioEngine';
 
-// 3.6.5 Gravity is applied to unsupported segments after 250ms/row
+// 3.7.2 Mechanics: Sweep, Timing, Transformation, Trailing Cleanup, Overlap
 /** @mustTestDrMarioGamestate */
-test('3.6.5 Cells fall one row after flash completes', async ({ page }) => {
+test('3.7.2 Victory Animation mechanics (sweep and cleanup)', async ({
+  page,
+}) => {
   await page.goto('/');
   await page.click('body');
   await page.click('text=New Game');
@@ -19,15 +21,12 @@ test('3.6.5 Cells fall one row after flash completes', async ({ page }) => {
   const grid: CellType[][] = Array.from({ length: 16 }, () =>
     Array.from({ length: 8 }, () => 'EMPTY' as CellType),
   );
-  // Match 4 viruses at bottom
   grid[15][0] = 'VIRUS_R';
   grid[15][1] = 'VIRUS_R';
   grid[15][2] = 'VIRUS_R';
   grid[15][3] = 'VIRUS_R';
-  grid[10][7] = 'VIRUS_B'; // Prevent VICTORY
-
-  // Floating pill segment at row 5
-  grid[5][0] = 'PILL_B_LEFT';
+  grid[0][5] = 'PILL_B'; // Test pill at row 0
+  grid[8][5] = 'PILL_Y'; // Test pill at row 8
 
   await page.evaluate((g) => {
     const engine = window.getE2EState('DRMARIO_ENGINE') as {
@@ -36,33 +35,35 @@ test('3.6.5 Cells fall one row after flash completes', async ({ page }) => {
     engine.setGrid(g);
   }, grid);
 
-  await page.keyboard.press(' '); // Match
+  await page.keyboard.press(' ');
 
-  // Wait for FLASHING
+  // Wait for WIN_ANIMATION specifically
   await page.waitForFunction(
     () =>
-      (window.getE2EState('DRMARIO_STATE') as GameState).status === 'FLASHING',
+      (window.getE2EState('DRMARIO_STATE') as GameState).status ===
+      'WIN_ANIMATION',
     { timeout: 5000 },
   );
 
-  // Wait for CASCADING
+  // Wait specifically for row 0 to be cleared (after sweep passes it)
   await page.waitForFunction(
     () =>
-      (window.getE2EState('DRMARIO_STATE') as GameState).status === 'CASCADING',
+      (window.getE2EState('DRMARIO_STATE') as GameState).grid[0][5] === 'EMPTY',
     { timeout: 5000 },
   );
 
-  // Wait until it transitions back to PLAYING (gravity done)
+  // Now wait specifically for row 8 to be processed (either EXPLODE or EMPTY)
   await page.waitForFunction(
-    () =>
-      (window.getE2EState('DRMARIO_STATE') as GameState).status === 'PLAYING',
+    () => {
+      const state = window.getE2EState('DRMARIO_STATE') as GameState;
+      const cell = state.grid[8][5];
+      return cell === 'EMPTY' || cell.startsWith('EXPLODE');
+    },
     { timeout: 5000 },
   );
 
   const state = await page.evaluate(
     () => window.getE2EState('DRMARIO_STATE') as GameState,
   );
-
-  // Pill should have fallen to row 15 (it was at row 5, matched viruses are now EMPTY)
-  expect(state.grid[15][0]).toBe('PILL_B_LEFT');
+  expect(state.status).toBe('WIN_ANIMATION');
 });
