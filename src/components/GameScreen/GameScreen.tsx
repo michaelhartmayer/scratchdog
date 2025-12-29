@@ -17,6 +17,9 @@ const CELL_EMOJI: Record<CellType, string> = {
   PILL_R: '🔴',
   PILL_Y: '🟡',
   PILL_B: '🔵',
+  EXPLODE_R: '💥',
+  EXPLODE_Y: '💥',
+  EXPLODE_B: '💥',
 };
 
 // Emoji mapping for pill colors (for active pill)

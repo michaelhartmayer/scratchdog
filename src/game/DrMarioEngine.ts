@@ -5,7 +5,10 @@ export type CellType =
   | 'VIRUS_B'
   | 'PILL_R'
   | 'PILL_Y'
-  | 'PILL_B';
+  | 'PILL_B'
+  | 'EXPLODE_R'
+  | 'EXPLODE_Y'
+  | 'EXPLODE_B';
 export type PillColor = 'R' | 'Y' | 'B';
 export type Orientation = 'HORIZONTAL' | 'VERTICAL';
 
@@ -22,7 +25,7 @@ export interface GameState {
   score: number;
   level: number;
   speed: 'LOW' | 'MED' | 'HIGH';
-  status: 'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'VICTORY' | 'CASCADING';
+  status: 'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'VICTORY' | 'FLASHING' | 'CASCADING';
   activePill: ActivePill | null;
   nextPill: { color1: PillColor; color2: PillColor } | null;
   virusCount: number;
@@ -45,6 +48,7 @@ export class DrMarioEngine {
     | 'PAUSED'
     | 'GAME_OVER'
     | 'VICTORY'
+    | 'FLASHING'
     | 'CASCADING' = 'PLAYING';
   private _activePill: ActivePill | null = null;
   private _nextPill: { color1: PillColor; color2: PillColor } | null = null;
@@ -52,8 +56,13 @@ export class DrMarioEngine {
   private _dropTimer = 0;
   private _lockTimer = 0;
   private _cascadeTimer = 0;
+  private _flashTimer = 0;
+  private _cellsToFlash: Set<string> = new Set();
   private _isLocking = false;
   private _pillsDropped = 0;
+
+  // Spec 3.6.1: Flash duration = 16 frames at 60fps = ~267ms
+  private readonly FLASH_DURATION = 267;
 
   public readonly WIDTH = 8;
   public readonly HEIGHT = 16;
@@ -91,7 +100,7 @@ export class DrMarioEngine {
 
   // Test Helper: Set status directly
   public setStatus(
-    status: 'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'VICTORY' | 'CASCADING',
+    status: 'PLAYING' | 'PAUSED' | 'GAME_OVER' | 'VICTORY' | 'FLASHING' | 'CASCADING',
   ) {
     this._status = status;
   }
@@ -445,14 +454,19 @@ export class DrMarioEngine {
     }
 
     if (toRemove.size > 0) {
-      // Calculate score (Spec 5.1)
+      // Spec 3.6.1/3.6.2: Convert matched cells to EXPLODE state (flash/starburst)
       let virusesCleared = 0;
       toRemove.forEach((pos) => {
         const [x, y] = pos.split(',').map(Number);
-        if (this._grid[y][x].startsWith('VIRUS_')) virusesCleared++;
-        this._grid[y][x] = 'EMPTY';
+        const cell = this._grid[y][x];
+        if (cell.startsWith('VIRUS_')) virusesCleared++;
+
+        // Convert to explosion cell type
+        const color = cell.split('_')[1];
+        this._grid[y][x] = `EXPLODE_${color}` as CellType;
       });
 
+      // Calculate score (Spec 5.1)
       if (virusesCleared > 0) {
         const basePoints =
           this._speed === 'LOW' ? 100 : this._speed === 'MED' ? 200 : 300;
@@ -460,16 +474,12 @@ export class DrMarioEngine {
         this._score += basePoints * virusesCleared * multiplier;
       }
 
-      // Update virus count
-      this._virusCount = this.countViruses();
-      if (this._virusCount === 0) {
-        this._status = 'VICTORY';
-        return;
-      }
+      // Store cells to clear after flash animation
+      this._cellsToFlash = toRemove;
 
-      // Start cascading instead of instant gravity
-      this._status = 'CASCADING';
-      this._cascadeTimer = 0;
+      // Spec 3.6.1: Enter FLASHING state for 267ms before clearing
+      this._status = 'FLASHING';
+      this._flashTimer = 0;
       return;
     }
 
@@ -563,6 +573,31 @@ export class DrMarioEngine {
   }
 
   public tick(deltaMs: number) {
+    // Spec 3.6.1: Handle FLASHING state (267ms flash before clearing)
+    if (this._status === 'FLASHING') {
+      this._flashTimer += deltaMs;
+      if (this._flashTimer >= this.FLASH_DURATION) {
+        // Flash complete - clear the explosion cells
+        this._cellsToFlash.forEach((pos) => {
+          const [x, y] = pos.split(',').map(Number);
+          this._grid[y][x] = 'EMPTY';
+        });
+        this._cellsToFlash.clear();
+
+        // Update virus count and check victory
+        this._virusCount = this.countViruses();
+        if (this._virusCount === 0) {
+          this._status = 'VICTORY';
+          return;
+        }
+
+        // Enter CASCADING for gravity
+        this._status = 'CASCADING';
+        this._cascadeTimer = 0;
+      }
+      return;
+    }
+
     if (this._status === 'CASCADING') {
       this._cascadeTimer += deltaMs;
       // 4 rows per second = 250ms per row (Spec 6.2.3)

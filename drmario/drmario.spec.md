@@ -29,6 +29,13 @@
         3.4.2. The next upcoming pill is visible to the player.  
     3.5. Locking  
         3.5.1. Pills lock into place when they land on a supported surface and are not moved for a short duration.  
+    3.6. Clear Animations  
+        3.6.1. When a match is made, matched segments flash for 16 frames (~267ms at 60fps) before being removed.  
+        3.6.2. Viruses are replaced with an "X" or starburst explosion sprite when eliminated.  
+        3.6.3. Capsule segments flash and disappear along with any viruses in the match.  
+        3.6.4. Input is disabled during the clear animation; the player cannot move the next pill.  
+        3.6.5. After the clear animation completes, unsupported capsule segments fall at 4 rows/second (250ms per row).  
+        3.6.6. Each cascade re-checks for new matches, repeating the clear animation if needed.  
 4. Game States  
     4.1. Clear Condition  
         4.1.1. A stage is cleared when all viruses are eliminated.  
