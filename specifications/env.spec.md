@@ -136,4 +136,5 @@
         11.1.3. HTML is used to create a table of contents  
 12. Network  
     12.1. Allowed Hosts  
-        12.1.1. add "scratchdog.jellytests.com" to `server.allowedHosts` in vite.config.js.
+        12.1.1. add "scratchdog.jellytests.com" to `server.allowedHosts` in vite.config.js.  
+
