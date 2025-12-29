@@ -46,12 +46,19 @@ test('3.5.2 Music fades in over 1 second when the game starts', async ({
   expect(vol2).toBeGreaterThan(vol1);
 
   // Eventually reached target (approx)
-  await expect.poll(async () => {
-    return page.evaluate(() => {
-      const win = window as unknown as {
-        getE2EState: (k: string) => { currentMusic: { volume: number } | null } | undefined;
-      };
-      return win.getE2EState('AUDIO_MANAGER')?.currentMusic?.volume ?? 0;
-    });
-  }, { timeout: 10000 }).toBeGreaterThan(0.2); // Default is 0.5 * 0.5 = 0.25
+  await expect
+    .poll(
+      async () => {
+        return page.evaluate(() => {
+          const win = window as unknown as {
+            getE2EState: (
+              k: string,
+            ) => { currentMusic: { volume: number } | null } | undefined;
+          };
+          return win.getE2EState('AUDIO_MANAGER')?.currentMusic?.volume ?? 0;
+        });
+      },
+      { timeout: 10000 },
+    )
+    .toBeGreaterThan(0.2); // Default is 0.5 * 0.5 = 0.25
 });
