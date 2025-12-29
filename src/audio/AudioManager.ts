@@ -338,6 +338,86 @@ export class AudioManager {
     }
   }
 
+  public async fadeInMusic(name: string, duration: number) {
+    if (
+      this._currentMusicAlias === name &&
+      this._isMusicPlaying &&
+      !this._musicPaused
+    ) {
+      // If already playing, just ensure volume is up? Or restart?
+      // Spec implies it fades in when menu starts. If we are already here, maybe we don't restart.
+      // But for robustness, let's treat it as a request to ensure it's playing and fade it in if not already at volume.
+      return;
+    }
+
+    await this._ensureAsset(name);
+
+    if (this._currentMusicInstance) {
+      try {
+        this._currentMusicInstance.stop();
+      } catch {
+        // ignore
+      }
+      this._currentMusicInstance = null;
+    }
+
+    const targetVol = this._masterVolume * this._musicVolume;
+    this._currentMusicAlias = name;
+
+    if (sound.exists(name)) {
+      const s = sound.find(name);
+      s.loop = true;
+      s.volume = 0;
+      this._currentMusicInstance = s;
+      this._isMusicPlaying = true;
+      this._musicPaused = false;
+      try {
+        await s.play();
+      } catch {
+        // ignore
+      }
+
+      const startTime = Date.now();
+      const timer = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const ratio = Math.min(1, elapsed / duration);
+        if (this._currentMusicInstance === s) {
+          s.volume = targetVol * ratio;
+        }
+
+        if (ratio >= 1 || this._currentMusicInstance !== s) {
+          clearInterval(timer);
+        }
+      }, 50);
+    } else {
+      // Fallback similar to playMusic
+      this._isMusicPlaying = true;
+      this._musicPaused = false;
+      if (process.env.NODE_ENV !== 'production') {
+        this._currentMusicInstance = {
+          loop: true,
+          volume: 0,
+          stop: () => { void 0; },
+          play: async () => {
+            await Promise.resolve();
+            return {} as unknown as Sound;
+          },
+        } as unknown as Sound;
+
+        // Mock fade for E2E visibility
+        const startTime = Date.now();
+        const timer = setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          const ratio = Math.min(1, elapsed / duration);
+          if (this._currentMusicInstance) {
+            this._currentMusicInstance.volume = targetVol * ratio;
+          }
+          if (ratio >= 1) clearInterval(timer);
+        }, 50);
+      }
+    }
+  }
+
   public setPaused(paused: boolean) {
     if (paused) {
       if (this._isMusicPlaying && !this._musicPaused) {

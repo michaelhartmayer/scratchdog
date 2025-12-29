@@ -1,5 +1,6 @@
 import { Button } from '../DesignSystem/Button';
 import { Text } from '../DesignSystem/Text';
+import { useMainMenuMusic } from '../../hooks/useMainMenuMusic';
 import './MainMenu.css';
 
 interface MainMenuProps {
@@ -17,16 +18,30 @@ export const MainMenu = ({
   // For E2E we might want to mock this or use localStorage logic
   const hasSave = localStorage.getItem('scratch_dog_save') !== null;
 
+  const { fadeOutAndExecute } = useMainMenuMusic();
+
+  const handleNewGame = () => {
+    fadeOutAndExecute(onNewGame);
+  };
+
+  const handleContinue = () => {
+    fadeOutAndExecute(onContinue);
+  };
+
   return (
     <div className="main-menu" data-testid="main-menu">
       <Text variant="hero" className="menu-title">
         Main Menu
       </Text>
       <div className="menu-items">
-        <Button onClick={onNewGame} className="menu-btn">
+        <Button onClick={handleNewGame} className="menu-btn">
           New Game
         </Button>
-        <Button disabled={!hasSave} onClick={onContinue} className="menu-btn">
+        <Button
+          disabled={!hasSave}
+          onClick={handleContinue}
+          className="menu-btn"
+        >
           Continue Game
         </Button>
         <Button onClick={onOptions} className="menu-btn">

@@ -20,7 +20,7 @@ test('6.2.3 Low-latency triggering for game-critical feedback', async ({
 
   const startTime = Date.now();
   await page.evaluate(() => {
-    ;(window.getE2EState('AUDIO_MANAGER') as E2EAudioState).playSFX(
+    (window.getE2EState('AUDIO_MANAGER') as E2EAudioState).playSFX(
       'critical_hit',
     );
   });

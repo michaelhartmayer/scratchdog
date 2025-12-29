@@ -27,6 +27,10 @@
         2.4.7. Has a footer  
             2.4.7.1. Has a "Back" button  
             2.4.7.2. Has an "Apply" button  
+    2.5. Main Menu Music  
+        2.5.1. Plays the main menu song, which is /audio/falling-falling-falling.mp3  
+        2.5.2. Music fades in over 1 second  
+        2.5.3. When Play is pressed the song fades out over 1 second  
 3. Game Screen  
     3.1. The screen fades in from black  
     3.2. The HUD is displayed  
