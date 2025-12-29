@@ -27,7 +27,8 @@ test('3.6.5 Cells fall one row after flash completes', async ({ page }) => {
   grid[10][7] = 'VIRUS_B'; // Prevent VICTORY
 
   // Floating pill segment at row 5
-  grid[5][0] = 'PILL_B_LEFT';
+  // Floating pill segment at row 5
+  grid[5][0] = 'PILL_B';
 
   await page.evaluate((g) => {
     const engine = window.getE2EState('DRMARIO_ENGINE') as {
@@ -64,5 +65,5 @@ test('3.6.5 Cells fall one row after flash completes', async ({ page }) => {
   );
 
   // Pill should have fallen to row 15 (it was at row 5, matched viruses are now EMPTY)
-  expect(state.grid[15][0]).toBe('PILL_B_LEFT');
+  expect(state.grid[15][0]).toBe('PILL_B');
 });
