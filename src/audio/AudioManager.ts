@@ -1,10 +1,11 @@
 import { Sound, sound } from '@pixi/sound';
 import { exposeE2EState } from '../utils/env-utils';
+import { AUDIO_VOLUME, ASSET_VOLUME } from '../art-override';
 
 export class AudioManager {
-  private _masterVolume = 0.5;
-  private _musicVolume = 0.5;
-  private _sfxVolume = 0.5;
+  private _masterVolume = AUDIO_VOLUME.MASTER;
+  private _musicVolume = AUDIO_VOLUME.MUSIC;
+  private _sfxVolume = AUDIO_VOLUME.SFX;
   private _isMuted = false;
 
   private _activeSFX = new Set<string>();
@@ -142,15 +143,16 @@ export class AudioManager {
 
   private _updateVolumes() {
     if (this._isMuted) return;
-    if (this._currentMusicInstance) {
+    if (this._currentMusicInstance && this._currentMusicAlias) {
+      const assetVol = ASSET_VOLUME[this._currentMusicAlias] ?? 1.0;
       this._currentMusicInstance.volume =
-        this._masterVolume * this._musicVolume;
+        this._masterVolume * this._musicVolume * assetVol;
     }
   }
 
   // --- SFX (6.2) ---
 
-  public async playSFX(name: string) {
+  public async playSFX(name: string, options: { speed?: number } = {}) {
     if (this._isMuted) return;
 
     await this._ensureAsset(name);
@@ -158,10 +160,12 @@ export class AudioManager {
     const currentCount = this._instanceCounts.get(name) ?? 0;
     this._instanceCounts.set(name, currentCount + 1);
 
-    const vol = this._masterVolume * this._sfxVolume;
+    const assetVol = ASSET_VOLUME[name] ?? 1.0;
+    const vol = this._masterVolume * this._sfxVolume * assetVol;
+    const speed = options.speed ?? 1.0;
     let instance;
     try {
-      instance = await sound.play(name, { volume: vol });
+      instance = await sound.play(name, { volume: vol, speed });
     } catch (err) {
       console.error('Failed to play SFX:', err);
     }
@@ -241,7 +245,8 @@ export class AudioManager {
       return;
     }
 
-    const targetVol = this._masterVolume * this._musicVolume;
+    const assetVol = ASSET_VOLUME[name] ?? 1.0;
+    const targetVol = this._masterVolume * this._musicVolume * assetVol;
     s.loop = loop;
     s.volume = targetVol;
     this._currentMusicAlias = name;
@@ -326,7 +331,9 @@ export class AudioManager {
     this._currentMusicInstance = newSound;
     this._isMusicPlaying = true;
 
-    const targetVol = this._masterVolume * this._musicVolume;
+    const assetVol = ASSET_VOLUME[name] ?? 1.0;
+    const targetVol = this._masterVolume * this._musicVolume * assetVol;
+    const oldTargetVol = oldInstance ? oldInstance.volume : 0;
     const startTime = Date.now();
 
     const timer = setInterval(() => {
@@ -334,7 +341,7 @@ export class AudioManager {
       const ratio = Math.min(1, elapsed / duration);
 
       if (oldInstance) {
-        oldInstance.volume = targetVol * (1 - ratio);
+        oldInstance.volume = oldTargetVol * (1 - ratio);
       }
       newSound.volume = targetVol * ratio;
 
@@ -377,7 +384,8 @@ export class AudioManager {
       return;
     }
 
-    const targetVol = this._masterVolume * this._musicVolume;
+    const assetVol = ASSET_VOLUME[name] ?? 1.0;
+    const targetVol = this._masterVolume * this._musicVolume * assetVol;
     this._currentMusicAlias = name;
 
     s.loop = true;

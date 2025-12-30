@@ -40,16 +40,18 @@ export interface GameState {
   level: number;
   speed: 'LOW' | 'MED' | 'HIGH';
   status:
-    | 'PLAYING'
-    | 'PAUSED'
-    | 'GAME_OVER'
-    | 'VICTORY'
-    | 'FLASHING'
-    | 'CASCADING'
-    | 'WIN_ANIMATION';
+  | 'PLAYING'
+  | 'PAUSED'
+  | 'GAME_OVER'
+  | 'VICTORY'
+  | 'FLASHING'
+  | 'CASCADING'
+  | 'WIN_ANIMATION';
   activePill: ActivePill | null;
   nextPill: { color1: PillColor; color2: PillColor } | null;
   virusCount: number;
+  comboCount: number;
+  cascadeCount: number;
 }
 
 // Spec 6.2: Gravity timing (frames between drops at 60fps)
@@ -86,8 +88,17 @@ export class DrMarioEngine {
   private _winAnimTimer = 0;
   private _winAnimCells = new Map<string, number>();
 
+  // Staggered explosion system
+  private _explosionRows = new Map<number, Set<string>>(); // Row number -> cell positions
+  private _explosionTimer = 0;
+  private _rowsToExplode: number[] = []; // Sorted bottom-to-top
+  private _popComboCount = 0; // Tracks consecutive pops for rising pitch
+  private _virusesKilledInTurn = 0; // Tracks viruses killed in current turn/combo
+  private _cascadeCount = 0; // Tracks number of match steps in chain
+
   // Spec 3.6.1: Flash duration = 16 frames at 60fps = ~267ms
   private readonly FLASH_DURATION = 267;
+  private readonly EXPLOSION_DELAY = 100; // ms between each row explosion
 
   public readonly WIDTH = 8;
   public readonly HEIGHT = 16;
@@ -109,6 +120,8 @@ export class DrMarioEngine {
       activePill: this._activePill ? { ...this._activePill } : null,
       nextPill: this._nextPill ? { ...this._nextPill } : null,
       virusCount: this._virusCount,
+      comboCount: this._virusesKilledInTurn,
+      cascadeCount: this._cascadeCount,
     };
   }
 
@@ -143,6 +156,9 @@ export class DrMarioEngine {
     this._score = 0;
     this._status = 'PLAYING';
     this._pillsDropped = 0;
+    this._popComboCount = 0;
+    this._virusesKilledInTurn = 0;
+    this._cascadeCount = 0;
     this._grid = Array.from({ length: this.HEIGHT }, () =>
       Array.from({ length: this.WIDTH }, () => 'EMPTY'),
     );
@@ -158,12 +174,16 @@ export class DrMarioEngine {
     this.spawnPill();
   }
 
+  // Spec: Viruses restricted to bottom 3/4 of board (Rows 4-15)
+  private readonly VIRUS_START_ROW = 4;
+
   private generateViruses() {
     const virusCount = Math.min(4 * (this._level + 1), 84);
     let placed = 0;
 
     while (placed < virusCount) {
-      let y = Math.floor(Math.random() * (this.HEIGHT - 4)) + 4;
+      // Random position within valid range
+      let y = Math.floor(Math.random() * (this.HEIGHT - this.VIRUS_START_ROW)) + this.VIRUS_START_ROW;
       let x = Math.floor(Math.random() * this.WIDTH);
 
       let attempts = 0;
@@ -175,7 +195,7 @@ export class DrMarioEngine {
         if (x >= this.WIDTH) {
           x = 0;
           y++;
-          if (y >= this.HEIGHT) y = 4;
+          if (y >= this.HEIGHT) y = this.VIRUS_START_ROW;
         }
         attempts++;
       }
@@ -269,6 +289,9 @@ export class DrMarioEngine {
     this._dropTimer = 0;
     this._isLocking = false;
     this._lockTimer = 0;
+    this._popComboCount = 0;
+    this._virusesKilledInTurn = 0;
+    this._cascadeCount = 0;
 
     this.generateNextPill();
   }
@@ -492,8 +515,11 @@ export class DrMarioEngine {
     }
 
     if (toRemove.size > 0) {
-      // Spec 3.6.1/3.6.2: Convert matched cells to EXPLODE state (flash/starburst)
+      // Spec 3.6.1/3.6.2: Organize matched cells by row for staggered explosions
       let virusesCleared = 0;
+      this._cascadeCount++;
+      this._explosionRows.clear();
+
       toRemove.forEach((pos) => {
         const [x, y] = pos.split(',').map(Number);
         const cell = this._grid[y][x];
@@ -536,11 +562,11 @@ export class DrMarioEngine {
           }
         }
 
-        // Convert to explosion cell type
-        const color = this.getMatchColor(cell);
-        if (color) {
-          this._grid[y][x] = `EXPLODE_${color}` as CellType;
+        // Organize cells by row for staggered explosion
+        if (!this._explosionRows.has(y)) {
+          this._explosionRows.set(y, new Set());
         }
+        this._explosionRows.get(y)!.add(pos);
       });
 
       // Calculate score (Spec 5.1)
@@ -549,14 +575,19 @@ export class DrMarioEngine {
           this._speed === 'LOW' ? 100 : this._speed === 'MED' ? 200 : 300;
         const multiplier = 2 ** (virusesCleared - 1);
         this._score += basePoints * virusesCleared * multiplier;
+        this._virusesKilledInTurn += virusesCleared;
       }
 
       // Store cells to clear after flash animation
       this._cellsToFlash = toRemove;
 
-      // Spec 3.6.1: Enter FLASHING state for 267ms before clearing
+      // Sort rows bottom-to-top (highest y value first)
+      this._rowsToExplode = Array.from(this._explosionRows.keys()).sort((a, b) => b - a);
+
+      // Spec 3.6.1: Enter FLASHING state for staggered explosions
       this._status = 'FLASHING';
       this._flashTimer = 0;
+      this._explosionTimer = 0;
       return;
     }
 
@@ -686,8 +717,11 @@ export class DrMarioEngine {
     }
 
     if (toRemove.size > 0) {
-      // Spec 3.6.7: Chained clears also use FLASHING animation
+      // Spec 3.6.7: Chained clears also use FLASHING animation with staggered explosions
       let virusesClearedCount = 0;
+      this._cascadeCount++;
+      this._explosionRows.clear();
+
       toRemove.forEach((pos) => {
         const [x, y] = pos.split(',').map(Number);
         const cell = this._grid[y][x];
@@ -732,11 +766,11 @@ export class DrMarioEngine {
           }
         }
 
-        // Convert to explosion cell type
-        const color = this.getMatchColor(cell);
-        if (color) {
-          this._grid[y][x] = `EXPLODE_${color}` as CellType;
+        // Organize cells by row for staggered explosion
+        if (!this._explosionRows.has(y)) {
+          this._explosionRows.set(y, new Set());
         }
+        this._explosionRows.get(y)!.add(pos);
       });
 
       // Award points for viruses in chain (Spec 5.1/3.2.2)
@@ -745,12 +779,18 @@ export class DrMarioEngine {
           this._speed === 'LOW' ? 100 : this._speed === 'MED' ? 200 : 300;
         const multiplier = 2 ** (virusesClearedCount - 1);
         this._score += basePoints * virusesClearedCount * multiplier;
+        this._virusesKilledInTurn += virusesClearedCount;
       }
 
       // Store cells to clear after flash and enter FLASHING
       this._cellsToFlash = toRemove;
+
+      // Sort rows bottom-to-top (highest y value first)
+      this._rowsToExplode = Array.from(this._explosionRows.keys()).sort((a, b) => b - a);
+
       this._status = 'FLASHING';
       this._flashTimer = 0;
+      this._explosionTimer = 0;
 
       return true; // Return true to indicate matches were found
     }
@@ -760,13 +800,40 @@ export class DrMarioEngine {
   public tick(dtMs: number) {
     const deltaMs = Math.min(dtMs, 250); // Cap at 250ms (one cascade step) to allow progress during lag
     if (this._status === 'FLASHING') {
+      this._explosionTimer += deltaMs;
       this._flashTimer += deltaMs;
-      if (this._flashTimer >= this.FLASH_DURATION) {
+
+      // Trigger explosions row-by-row with 100ms delays
+      while (this._rowsToExplode.length > 0 && this._explosionTimer >= this.EXPLOSION_DELAY) {
+        this._explosionTimer -= this.EXPLOSION_DELAY;
+        const currentRow = this._rowsToExplode.shift()!;
+        const cellsInRow = this._explosionRows.get(currentRow);
+
+        if (cellsInRow) {
+          cellsInRow.forEach((pos) => {
+            const [x, y] = pos.split(',').map(Number);
+            const cell = this._grid[y][x];
+            const color = this.getMatchColor(cell);
+            if (color) {
+              this._grid[y][x] = `EXPLODE_${color}` as CellType;
+            }
+          });
+
+          // Play pop sound for this row's explosion with rising pitch
+          this._popComboCount++;
+          const pitch = 1.0 + (this._popComboCount * 0.15); // Increase pitch by 15% per pop
+          void audioManager.playSFX('pop', { speed: pitch });
+        }
+      }
+
+      // After all rows have exploded and flash duration has passed, clear cells
+      if (this._rowsToExplode.length === 0 && this._flashTimer >= this.FLASH_DURATION) {
         this._cellsToFlash.forEach((pos) => {
           const [x, y] = pos.split(',').map(Number);
           this._grid[y][x] = 'EMPTY';
         });
         this._cellsToFlash.clear();
+        this._explosionRows.clear();
 
         this._virusCount = this.countViruses();
         if (this._virusCount === 0) {
@@ -778,8 +845,6 @@ export class DrMarioEngine {
           this._status = 'CASCADING';
           this._cascadeTimer = 0;
         }
-
-        void audioManager.playSFX('pop');
       }
     } else if (this._status === 'WIN_ANIMATION') {
       this._winAnimTimer += deltaMs;
