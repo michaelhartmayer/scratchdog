@@ -92,6 +92,7 @@
 }
 
 @keyframes pulse {
+
   0%,
   100% {
     opacity: 0.4;
@@ -113,6 +114,7 @@
 }
 
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0);
@@ -124,6 +126,7 @@
 }
 
 @keyframes glow {
+
   0%,
   100% {
     box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
@@ -136,6 +139,7 @@
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -187,13 +191,12 @@ button:disabled {
 /* Game Styles */
 #pill-bottle {
   position: relative;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  /* Glass effect removed from here to prevent full-screen compositor lag */
+  border: 4px solid rgba(255, 255, 255, 0.15);
   border-radius: 20px 20px 40px 40px;
-  padding: 20px;
-  opacity: 0.9;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  padding: 10px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  background: none;
 }
 
 #bottle-neck {
@@ -221,9 +224,11 @@ button:disabled {
 .pill-segment.red {
   background-color: var(--color-dr-red);
 }
+
 .pill-segment.yellow {
   background-color: var(--color-dr-yellow);
 }
+
 .pill-segment.blue {
   background-color: var(--color-dr-blue);
 }
@@ -242,6 +247,7 @@ button:disabled {
   from {
     transform: rotate(-5deg);
   }
+
   to {
     transform: rotate(5deg);
   }

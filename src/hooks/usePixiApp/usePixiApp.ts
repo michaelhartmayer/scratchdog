@@ -4,9 +4,10 @@ import { Application } from 'pixi.js';
 interface UsePixiAppProps {
   containerRef: React.RefObject<HTMLDivElement>;
   onInit: (app: Application) => void;
+  options?: { width?: number; height?: number; backgroundAlpha?: number };
 }
 
-export const usePixiApp = ({ containerRef, onInit }: UsePixiAppProps) => {
+export const usePixiApp = ({ containerRef, onInit, options }: UsePixiAppProps) => {
   const appRef = useRef<Application | null>(null);
 
   useEffect(() => {
@@ -18,9 +19,9 @@ export const usePixiApp = ({ containerRef, onInit }: UsePixiAppProps) => {
 
       const app = new Application();
       await app.init({
-        width: 8 * 32,
-        height: 16 * 32,
-        backgroundAlpha: 0,
+        width: options?.width ?? 8 * 32,
+        height: options?.height ?? 16 * 32,
+        backgroundAlpha: options?.backgroundAlpha ?? 0,
       });
 
       if (cancelled) {
