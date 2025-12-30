@@ -51,6 +51,7 @@ export interface GameState {
   nextPill: { color1: PillColor; color2: PillColor } | null;
   virusCount: number;
   comboCount: number;
+  cascadeCount: number;
 }
 
 // Spec 6.2: Gravity timing (frames between drops at 60fps)
@@ -93,6 +94,7 @@ export class DrMarioEngine {
   private _rowsToExplode: number[] = []; // Sorted bottom-to-top
   private _popComboCount = 0; // Tracks consecutive pops for rising pitch
   private _virusesKilledInTurn = 0; // Tracks viruses killed in current turn/combo
+  private _cascadeCount = 0; // Tracks number of match steps in chain
 
   // Spec 3.6.1: Flash duration = 16 frames at 60fps = ~267ms
   private readonly FLASH_DURATION = 267;
@@ -119,6 +121,7 @@ export class DrMarioEngine {
       nextPill: this._nextPill ? { ...this._nextPill } : null,
       virusCount: this._virusCount,
       comboCount: this._virusesKilledInTurn,
+      cascadeCount: this._cascadeCount,
     };
   }
 
@@ -155,6 +158,7 @@ export class DrMarioEngine {
     this._pillsDropped = 0;
     this._popComboCount = 0;
     this._virusesKilledInTurn = 0;
+    this._cascadeCount = 0;
     this._grid = Array.from({ length: this.HEIGHT }, () =>
       Array.from({ length: this.WIDTH }, () => 'EMPTY'),
     );
@@ -287,6 +291,7 @@ export class DrMarioEngine {
     this._lockTimer = 0;
     this._popComboCount = 0;
     this._virusesKilledInTurn = 0;
+    this._cascadeCount = 0;
 
     this.generateNextPill();
   }
@@ -512,6 +517,7 @@ export class DrMarioEngine {
     if (toRemove.size > 0) {
       // Spec 3.6.1/3.6.2: Organize matched cells by row for staggered explosions
       let virusesCleared = 0;
+      this._cascadeCount++;
       this._explosionRows.clear();
 
       toRemove.forEach((pos) => {
@@ -713,6 +719,7 @@ export class DrMarioEngine {
     if (toRemove.size > 0) {
       // Spec 3.6.7: Chained clears also use FLASHING animation with staggered explosions
       let virusesClearedCount = 0;
+      this._cascadeCount++;
       this._explosionRows.clear();
 
       toRemove.forEach((pos) => {

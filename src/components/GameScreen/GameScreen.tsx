@@ -5,7 +5,7 @@ import { Text } from '../DesignSystem/Text';
 import { useGameMusic } from '../../hooks/useGameMusic';
 import { usePixiApp } from '../../hooks/usePixiApp';
 import { useKeyboardInput } from '../../hooks/useKeyboardInput';
-import { DrMarioEngine, PillColor } from '../../game/DrMarioEngine';
+import { DrMarioEngine } from '../../game/DrMarioEngine';
 import { createStarfield } from '../../effects/Starfield';
 import { ART_ZOOM, ART_BLEND, ART_TINT, COMBO_MESSAGES } from '../../art-override';
 import { useGameScreen } from '../../hooks/useGameScreen';
@@ -43,10 +43,6 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
   const [paused, setPaused] = useState(false);
   const [score, setScore] = useState(0);
   const [virusCount, setVirusCount] = useState(0);
-  const [nextPill, setNextPill] = useState<{
-    color1: PillColor;
-    color2: PillColor;
-  } | null>(null);
   const [fps, setFps] = useState(0);
   const pixiRootRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null); // Still used for positioning
@@ -147,7 +143,6 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
       engineRef.current.initializeLevel(2, 'LOW');
       setScore(engineRef.current.state.score);
       setVirusCount(engineRef.current.state.virusCount);
-      setNextPill(engineRef.current.state.nextPill);
 
       // 1. Create Glass Background for the bottle area
       const glassG = new Graphics();
@@ -159,9 +154,21 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
       app.stage.addChildAt(boardContainer, 2);
 
       // Update function to align board with HTML bottle
+      let lastRect = { x: 0, y: 0, w: 0, h: 0 };
       const alignBoard = () => {
         if (!containerRef.current) return;
         const rect = containerRef.current.getBoundingClientRect();
+
+        // Optimized check
+        if (
+          Math.abs(rect.left - lastRect.x) < 0.1 &&
+          Math.abs(rect.top - lastRect.y) < 0.1 &&
+          Math.abs(rect.width - lastRect.w) < 0.1 &&
+          Math.abs(rect.height - lastRect.h) < 0.1
+        ) {
+          return;
+        }
+        lastRect = { x: rect.left, y: rect.top, w: rect.width, h: rect.height };
 
         glassG.clear()
           .roundRect(rect.left - 8, rect.top - 8, rect.width + 16, rect.height + 16, 24)
@@ -172,8 +179,8 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
         starfield.resize(window.innerWidth, window.innerHeight);
       };
 
-      window.addEventListener('resize', alignBoard);
-      alignBoard(); // Initial alignment
+      // Initial alignment
+      alignBoard();
 
       // Trail Container (Behind Active Pill)
       const trailGraphics = new Graphics();
@@ -238,6 +245,7 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
         phase: 'POP', // 'POP', 'WAIT', 'DISPERSE'
       };
       let lastComboCount = 0;
+      let lastCascadeCount = 0;
 
       app.ticker.add(() => {
         const now = performance.now();
@@ -251,11 +259,22 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
         const deltaMs = app.ticker.deltaMS;
         const deltaSec = deltaMs / 1000;
 
+        // Sync board position
+        alignBoard();
+
         // --- Combo Logic ---
         const currentCombo = engineRef.current.state.comboCount;
-        if (currentCombo > lastComboCount && currentCombo >= 2) {
-          // Find matching config (High to Low)
-          const config = COMBO_MESSAGES.find((c) => currentCombo >= c.threshold);
+        const currentCascade = engineRef.current.state.cascadeCount;
+
+        // Trigger if combo count increased OR if chain step occurred (even if only pills cleared)
+        if (
+          (currentCombo > lastComboCount || currentCascade > lastCascadeCount) &&
+          currentCombo >= 2
+        ) {
+          // Find matching config (High to Low, robust sort)
+          const config = [...COMBO_MESSAGES]
+            .sort((a, b) => b.threshold - a.threshold)
+            .find((c) => currentCombo >= c.threshold);
           if (config) {
             comboText.text = config.text;
             comboText.style.fill = config.color;
@@ -268,6 +287,7 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
           }
         }
         lastComboCount = currentCombo;
+        lastCascadeCount = currentCascade;
 
         if (comboAnim.active) {
           comboAnim.timer += deltaSec;
@@ -347,7 +367,6 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
           const state = engineRef.current.state;
           setScore(state.score);
           setVirusCount(state.virusCount);
-          setNextPill(state.nextPill);
           exposeE2EState('DRMARIO_STATE', state);
           exposeE2EState('DRMARIO_ENGINE', engineRef.current);
 
@@ -698,39 +717,7 @@ export const GameScreen = ({ onMainMenu, onGameOver }: GameScreenProps) => {
           <Text variant="heading">{score}</Text>
         </div>
 
-        <div
-          className="glass-panel"
-          style={{ padding: '10px 15px', textAlign: 'center' }}
-        >
-          <div style={{ marginBottom: '4px' }}>
-            <Text variant="overline">NEXT</Text>
-          </div>
-          <div
-            style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}
-          >
-            {nextPill ? (
-              <>
-                <div
-                  className={`pill-segment ${nextPill.color1.toLowerCase()}`}
-                  style={{ width: '16px', height: '16px', borderRadius: '50%' }}
-                />
-                <div
-                  className={`pill-segment ${nextPill.color2.toLowerCase()}`}
-                  style={{ width: '16px', height: '16px', borderRadius: '50%' }}
-                />
-              </>
-            ) : (
-              <div
-                style={{
-                  width: '36px',
-                  height: '16px',
-                  background: 'rgba(255,255,255,0.05)',
-                  borderRadius: '8px',
-                }}
-              />
-            )}
-          </div>
-        </div>
+
 
         <div
           className="glass-panel"
